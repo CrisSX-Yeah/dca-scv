@@ -8,6 +8,7 @@ import javax.servlet.http.HttpSession;
 @Component
 public class ManagerUserSession {
 
+    
     @Autowired
     HttpSession session;
 

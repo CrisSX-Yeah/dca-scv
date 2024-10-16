@@ -6,3 +6,4 @@ public class TareaServiceException extends RuntimeException {
         super(message);
     }
 }
+

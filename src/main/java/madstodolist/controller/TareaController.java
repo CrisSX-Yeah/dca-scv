@@ -34,6 +34,7 @@ public class TareaController {
             throw new UsuarioNoLogeadoException();
     }
 
+
     @GetMapping("/usuarios/{id}/tareas/nueva")
     public String formNuevaTarea(@PathVariable(value="id") Long idUsuario,
                                  @ModelAttribute TareaData tareaData, Model model,

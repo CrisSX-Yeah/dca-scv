@@ -4,20 +4,14 @@
 <head th:replace="fragments :: head (titulo='Acerca de')"></head>
 
 <body>
-<div th:replace="fragments::menuBar" th:if="${usuario != null}"></div>
-<div th:if="${usuario == null}">
-  <!-- No menu bar for about page if user is not logged in -->
-  <div th:replace="fragments::head (titulo='Acerca de')"></div>
-</div>
+<div th:replace="fragments::menuBar"></div>
 <div class="container-fluid">
-  <div class="container-fluid">
-    <h1>ToDoList</h1>
-    <ul>
-      <li>Desarrollada por Cristian Silvestre</li>
-      <li>Versión 1.0.1</li>
-      <li>Fecha de release: 19-10-2024</li>
-    </ul>
-  </div>
+  <h1>ToDoList</h1>
+  <ul>
+    <li>Desarrollada por Cristian Silvestre</li>
+    <li>Versión 1.0.1</li>
+    <li>Fecha de release: 19-10-2024</li>
+  </ul>
 </div>
 
 <div th:replace="fragments::javascript"/>

@@ -19,6 +19,7 @@ import java.util.List;
 @Controller
 public class TareaController {
 
+
     @Autowired
     UsuarioService usuarioService;
 
@@ -30,8 +31,9 @@ public class TareaController {
 
     private void comprobarUsuarioLogeado(Long idUsuario) {
         Long idUsuarioLogeado = managerUserSession.usuarioLogeado();
-        if (!idUsuario.equals(idUsuarioLogeado))
+        if (idUsuarioLogeado == null || !idUsuario.equals(idUsuarioLogeado)) {
             throw new UsuarioNoLogeadoException();
+        }
     }
 
 
@@ -42,8 +44,6 @@ public class TareaController {
 
         comprobarUsuarioLogeado(idUsuario);
 
-        UsuarioData usuario = usuarioService.findById(idUsuario);
-        model.addAttribute("usuario", usuario);
         return "formNuevaTarea";
     }
 
@@ -64,9 +64,7 @@ public class TareaController {
 
         comprobarUsuarioLogeado(idUsuario);
 
-        UsuarioData usuario = usuarioService.findById(idUsuario);
         List<TareaData> tareas = tareaService.allTareasUsuario(idUsuario);
-        model.addAttribute("usuario", usuario);
         model.addAttribute("tareas", tareas);
         return "listaTareas";
     }
@@ -87,6 +85,19 @@ public class TareaController {
         model.addAttribute("tarea", tarea);
         tareaData.setTitulo(tarea.getTitulo());
         return "formEditarTarea";
+    }
+
+    @GetMapping("/tasks-auth")
+    public String handleTasksLink(RedirectAttributes redirectAttributes) {
+        Long idUsuarioLogeado = managerUserSession.usuarioLogeado();
+
+        if (idUsuarioLogeado == null) {
+            // User is not logged in, redirect to login page
+            return "redirect:/login";
+        } else {
+            // User is logged in, redirect to the tasks page for the user
+            return "redirect:/usuarios/" + idUsuarioLogeado + "/tareas";
+        }
     }
 
     @PostMapping("/tareas/{id}/editar")

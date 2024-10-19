@@ -19,6 +19,7 @@ import java.util.List;
 @Controller
 public class TareaController {
 
+
     @Autowired
     UsuarioService usuarioService;
 
@@ -30,8 +31,9 @@ public class TareaController {
 
     private void comprobarUsuarioLogeado(Long idUsuario) {
         Long idUsuarioLogeado = managerUserSession.usuarioLogeado();
-        if (!idUsuario.equals(idUsuarioLogeado))
+        if (idUsuarioLogeado == null || !idUsuario.equals(idUsuarioLogeado)) {
             throw new UsuarioNoLogeadoException();
+        }
     }
 
 
@@ -42,8 +44,6 @@ public class TareaController {
 
         comprobarUsuarioLogeado(idUsuario);
 
-        UsuarioData usuario = usuarioService.findById(idUsuario);
-        model.addAttribute("usuario", usuario);
         return "formNuevaTarea";
     }
 
@@ -57,16 +57,14 @@ public class TareaController {
         tareaService.nuevaTareaUsuario(idUsuario, tareaData.getTitulo());
         flash.addFlashAttribute("mensaje", "Tarea creada correctamente");
         return "redirect:/usuarios/" + idUsuario + "/tareas";
-     }
+    }
 
     @GetMapping("/usuarios/{id}/tareas")
     public String listadoTareas(@PathVariable(value="id") Long idUsuario, Model model, HttpSession session) {
 
         comprobarUsuarioLogeado(idUsuario);
 
-        UsuarioData usuario = usuarioService.findById(idUsuario);
         List<TareaData> tareas = tareaService.allTareasUsuario(idUsuario);
-        model.addAttribute("usuario", usuario);
         model.addAttribute("tareas", tareas);
         return "listaTareas";
     }
@@ -82,9 +80,24 @@ public class TareaController {
 
         comprobarUsuarioLogeado(tarea.getUsuarioId());
 
+        UsuarioData usuario = usuarioService.findById(tarea.getUsuarioId());
+        model.addAttribute("usuario", usuario);
         model.addAttribute("tarea", tarea);
         tareaData.setTitulo(tarea.getTitulo());
         return "formEditarTarea";
+    }
+
+    @GetMapping("/tasks-auth")
+    public String handleTasksLink(RedirectAttributes redirectAttributes) {
+        Long idUsuarioLogeado = managerUserSession.usuarioLogeado();
+
+        if (idUsuarioLogeado == null) {
+            // User is not logged in, redirect to login page
+            return "redirect:/login";
+        } else {
+            // User is logged in, redirect to the tasks page for the user
+            return "redirect:/usuarios/" + idUsuarioLogeado + "/tareas";
+        }
     }
 
     @PostMapping("/tareas/{id}/editar")
@@ -106,8 +119,6 @@ public class TareaController {
 
     @DeleteMapping("/tareas/{id}")
     @ResponseBody
-    // La anotación @ResponseBody sirve para que la cadena devuelta sea la resupuesta
-    // de la petición HTTP, en lugar de una plantilla thymeleaf
     public String borrarTarea(@PathVariable(value="id") Long idTarea, RedirectAttributes flash, HttpSession session) {
         TareaData tarea = tareaService.findById(idTarea);
         if (tarea == null) {
@@ -119,7 +130,4 @@ public class TareaController {
         tareaService.borraTarea(idTarea);
         return "";
     }
-
-    
 }
-

@@ -7,6 +7,8 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,8 +20,6 @@ public class UsuarioService {
     Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
     public enum LoginStatus {LOGIN_OK, USER_NOT_FOUND, ERROR_PASSWORD}
-
-
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -73,5 +73,12 @@ public class UsuarioService {
         else {
             return modelMapper.map(usuario, UsuarioData.class);
         }
+    }
+
+    // New method to retrieve paginated list of users
+    @Transactional(readOnly = true)
+    public Page<UsuarioData> listarUsuarios(Pageable pageable) {
+        return usuarioRepository.findAll(pageable)
+                .map(usuario -> modelMapper.map(usuario, UsuarioData.class));
     }
 }

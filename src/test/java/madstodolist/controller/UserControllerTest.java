@@ -89,4 +89,5 @@ public class UserControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("user3@example.com")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("user1@example.com"))));
     }
+
 }

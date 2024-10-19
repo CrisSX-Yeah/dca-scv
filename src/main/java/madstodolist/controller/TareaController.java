@@ -19,6 +19,7 @@ import java.util.List;
 @Controller
 public class TareaController {
 
+
     @Autowired
     UsuarioService usuarioService;
 
@@ -82,6 +83,19 @@ public class TareaController {
         model.addAttribute("tarea", tarea);
         tareaData.setTitulo(tarea.getTitulo());
         return "formEditarTarea";
+    }
+
+    @GetMapping("/tasks-auth")
+    public String handleTasksLink(RedirectAttributes redirectAttributes) {
+        Long idUsuarioLogeado = managerUserSession.usuarioLogeado();
+
+        if (idUsuarioLogeado == null) {
+            // User is not logged in, redirect to login page
+            return "redirect:/login";
+        } else {
+            // User is logged in, redirect to the tasks page for the user
+            return "redirect:/usuarios/" + idUsuarioLogeado + "/tareas";
+        }
     }
 
     @PostMapping("/tareas/{id}/editar")

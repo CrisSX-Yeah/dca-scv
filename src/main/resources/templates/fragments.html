@@ -21,8 +21,8 @@
                     <a class="nav-link" th:href="@{/about}">ToDoList</a>
                 </li>
                 <!-- Conditionally render the "Tasks" link only if the user is logged in -->
-                <li class="nav-item" th:if="${usuario != null}">
-                    <a class="nav-link" th:href="@{/usuarios/{id}/tareas(id=${usuario.id})}">Tasks</a>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/tasks-auth}">Tasks</a>
                 </li>
             </ul>
             <ul class="navbar-nav">

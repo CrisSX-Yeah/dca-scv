@@ -9,3 +9,4 @@ COPY target/*.jar app.jar
 # Más información:
 # https://www.digitalocean.com/community/tutorials/how-to-setup-additional-entropy-for-cloud-servers-using-haveged
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/urandom","-jar","/app.jar"]
+EXPOSE 8080

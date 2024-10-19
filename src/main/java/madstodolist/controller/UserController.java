@@ -48,4 +48,5 @@ public class UserController {
         model.addAttribute("usuario", usuario);
         return "usuarioDescripcion";
     }
+
 }

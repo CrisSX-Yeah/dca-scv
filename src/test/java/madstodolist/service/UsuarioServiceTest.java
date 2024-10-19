@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Sql(scripts = "/clean-db.sql")
 public class UsuarioServiceTest {
 
+
     @Autowired
     private UsuarioService usuarioService;
 

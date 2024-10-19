@@ -25,5 +25,6 @@ public class GlobalExceptionHandler {
         return mav;
     }
 
+
     // Optionally, handle other exceptions
 }

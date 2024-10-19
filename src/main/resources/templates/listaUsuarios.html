@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments :: head (titulo='Usuarios Registrados')"></head>
+
+<body>
+<div th:replace="fragments::menuBar"></div>
+<div class="container mt-4">
+  <h2>Usuarios Registrados</h2>
+  <table class="table table-striped mt-3">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Email</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="usuario : ${usuariosPage.content}">
+      <td th:text="${usuario.id}"></td>
+      <td th:text="${usuario.email}"></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination Controls -->
+  <nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:classappend="${usuariosPage.first} ? 'disabled'">
+        <a class="page-link" th:href="@{/registrados(page=${usuariosPage.number - 1}, size=${usuariosPage.size})}" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(0, usuariosPage.totalPages - 1)}"
+          th:classappend="${i == usuariosPage.number} ? 'active'">
+        <a class="page-link" th:text="${i + 1}"
+           th:href="@{/registrados(page=${i}, size=${usuariosPage.size})}"></a>
+      </li>
+      <li class="page-item" th:classappend="${usuariosPage.last} ? 'disabled'">
+        <a class="page-link" th:href="@{/registrados(page=${usuariosPage.number + 1}, size=${usuariosPage.size})}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<div th:replace="fragments::javascript"></div>
+</body>
+</html>

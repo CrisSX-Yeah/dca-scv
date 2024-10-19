@@ -4,26 +4,25 @@ import madstodolist.authentication.ManagerUserSession;
 import madstodolist.dto.UsuarioData;
 import madstodolist.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
-@Controller
-public class HomeController {
-
-    @Autowired
-    private UsuarioService usuarioService;
+@ControllerAdvice
+public class GlobalControllerAdvice {
 
     @Autowired
     private ManagerUserSession managerUserSession;
 
-    @GetMapping("/about")
-    public String about(Model model) {
+    @Autowired
+    private UsuarioService usuarioService;
+
+    @ModelAttribute
+    public void addAttributes(Model model) {
         Long idUsuarioLogeado = managerUserSession.usuarioLogeado();
         if (idUsuarioLogeado != null) {
             UsuarioData usuario = usuarioService.findById(idUsuarioLogeado);
             model.addAttribute("usuario", usuario);
         }
-        return "about";
     }
 }

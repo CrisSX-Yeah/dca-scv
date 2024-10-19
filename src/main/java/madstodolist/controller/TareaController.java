@@ -30,8 +30,9 @@ public class TareaController {
 
     private void comprobarUsuarioLogeado(Long idUsuario) {
         Long idUsuarioLogeado = managerUserSession.usuarioLogeado();
-        if (!idUsuario.equals(idUsuarioLogeado))
+        if (idUsuarioLogeado == null || !idUsuario.equals(idUsuarioLogeado)) {
             throw new UsuarioNoLogeadoException();
+        }
     }
 
 
@@ -42,8 +43,6 @@ public class TareaController {
 
         comprobarUsuarioLogeado(idUsuario);
 
-        UsuarioData usuario = usuarioService.findById(idUsuario);
-        model.addAttribute("usuario", usuario);
         return "formNuevaTarea";
     }
 
@@ -64,9 +63,7 @@ public class TareaController {
 
         comprobarUsuarioLogeado(idUsuario);
 
-        UsuarioData usuario = usuarioService.findById(idUsuario);
         List<TareaData> tareas = tareaService.allTareasUsuario(idUsuario);
-        model.addAttribute("usuario", usuario);
         model.addAttribute("tareas", tareas);
         return "listaTareas";
     }
@@ -82,8 +79,6 @@ public class TareaController {
 
         comprobarUsuarioLogeado(tarea.getUsuarioId());
 
-        UsuarioData usuario = usuarioService.findById(tarea.getUsuarioId());
-        model.addAttribute("usuario", usuario);
         model.addAttribute("tarea", tarea);
         tareaData.setTitulo(tarea.getTitulo());
         return "formEditarTarea";

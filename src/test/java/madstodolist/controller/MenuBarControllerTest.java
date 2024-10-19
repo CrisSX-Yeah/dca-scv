@@ -6,24 +6,22 @@ import madstodolist.service.UsuarioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = {HomeController.class, TareaController.class, LoginController.class})
+@Import(GlobalExceptionHandler.class) // Import the exception handler
 public class MenuBarControllerTest {
 
     @Autowired
@@ -39,6 +37,7 @@ public class MenuBarControllerTest {
 
     @BeforeEach
     public void setup() {
+        MockitoAnnotations.openMocks(this);
         usuario = new UsuarioData();
         usuario.setId(1L);
         usuario.setNombre("Cristian");
@@ -72,7 +71,7 @@ public class MenuBarControllerTest {
 
         mockMvc.perform(get("/usuarios/1/tareas"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl("/login?error=not_logged_in"));
     }
 
     @Test

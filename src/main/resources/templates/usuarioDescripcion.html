@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments :: head (titulo='Descripción de Usuario')"></head>
+
+<body>
+<div th:replace="fragments::menuBar"></div>
+<div class="container mt-4">
+  <h2>Descripción del Usuario</h2>
+  <div class="card mt-3">
+    <div class="card-body">
+      <h5 class="card-title" th:text="${usuario.nombre}">Nombre del Usuario</h5>
+      <p class="card-text"><strong>ID:</strong> <span th:text="${usuario.id}"></span></p>
+      <p class="card-text"><strong>Email:</strong> <span th:text="${usuario.email}"></span></p>
+      <p class="card-text" th:if="${usuario.fechaNacimiento != null}">
+        <strong>Fecha de Nacimiento:</strong>
+        <span th:text="${#dates.format(usuario.fechaNacimiento, 'dd/MM/yyyy')}"></span>
+      </p>
+      <p class="card-text" th:if="${usuario.fechaNacimiento == null}">
+        <strong>Fecha de Nacimiento:</strong> No proporcionada
+      </p>
+      <!-- Add more fields as necessary, excluding sensitive information -->
+    </div>
+  </div>
+  <a th:href="@{/registrados}" class="btn btn-primary mt-3">Volver a la Lista de Usuarios</a>
+</div>
+
+<div th:replace="fragments::javascript"></div>
+</body>
+</html>
+

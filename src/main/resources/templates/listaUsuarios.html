@@ -12,12 +12,17 @@
     <tr>
       <th>ID</th>
       <th>Email</th>
+      <th>Descripción</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="usuario : ${usuariosPage.content}">
       <td th:text="${usuario.id}"></td>
       <td th:text="${usuario.email}"></td>
+      <td>
+        <!-- Link to User Description -->
+        <a th:href="@{'/registrados/' + ${usuario.id}}">Ver Descripción</a>
+      </td>
     </tr>
     </tbody>
   </table>

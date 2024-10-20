@@ -183,8 +183,4 @@ public class UserControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("admin@ua"))));
     }
 
-
-
-
-
 }

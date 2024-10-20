@@ -175,8 +175,8 @@ public class UserControllerTest {
         // WHEN & THEN
         mockMvc.perform(get("/registrados/999"))
                 .andExpect(status().isOk()) // The controller should return view "error/404" with status 200
-                .andExpect(view().name("error/404"));
-             //   .andExpect(model().attributeDoesNotExist("usuario"));
+                .andExpect(view().name("error/404"))
+                .andExpect(model().attributeDoesNotExist("usuario"));
     }
 
     @Test

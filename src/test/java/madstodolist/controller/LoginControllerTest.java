@@ -94,7 +94,7 @@ public class LoginControllerTest {
                         .param("password", "adminpass")
                         .param("admin", "true"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/registrados"));
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test

@@ -334,4 +334,5 @@ public class UserControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("Permiso insuficiente para acceder a esta página."));
     }
+
 }

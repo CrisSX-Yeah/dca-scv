@@ -104,7 +104,7 @@ public class LoginController {
 
             // Redirect based on admin status
             if (nuevoUsuario.getAdmin()) {
-                return "redirect:/registrados";
+                return "redirect:/login";
             } else {
                 return "redirect:/login";
             }

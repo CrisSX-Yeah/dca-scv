@@ -100,3 +100,6 @@ public class UsuarioService {
                 .map(usuario -> modelMapper.map(usuario, UsuarioData.class));
     }
 }
+
+
+

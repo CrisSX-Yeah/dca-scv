@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+// Import necessary annotations and classes
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -76,18 +77,25 @@ public class LoginController {
     public String registroSubmit(@Valid RegistroData registroData, BindingResult result, Model model) {
 
         if (result.hasErrors()) {
+            // Set 'adminExists' when returning to the form due to validation errors
+            boolean adminExists = usuarioService.existeAdministrador();
+            model.addAttribute("adminExists", adminExists);
             return "formRegistro";
         }
 
         // Check if admin registration is allowed
         if (registroData.getAdmin() && usuarioService.existeAdministrador()) {
             model.addAttribute("error", "Ya existe un administrador en el sistema");
+            boolean adminExists = usuarioService.existeAdministrador();
+            model.addAttribute("adminExists", adminExists);
             return "formRegistro";
         }
 
         if (usuarioService.findByEmail(registroData.getEmail()) != null) {
             model.addAttribute("registroData", registroData);
             model.addAttribute("error", "El usuario " + registroData.getEmail() + " ya existe");
+            boolean adminExists = usuarioService.existeAdministrador();
+            model.addAttribute("adminExists", adminExists);
             return "formRegistro";
         }
 
@@ -102,6 +110,8 @@ public class LoginController {
             }
         } catch (UsuarioServiceException e) {
             model.addAttribute("error", e.getMessage());
+            boolean adminExists = usuarioService.existeAdministrador();
+            model.addAttribute("adminExists", adminExists);
             return "formRegistro";
         }
     }

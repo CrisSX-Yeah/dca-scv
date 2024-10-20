@@ -172,4 +172,34 @@ public class UsuarioTest {
 
         assertThat(usuarioBD.getNombre()).isEqualTo("Usuario Ejemplo");
     }
+
+    @Test
+    @Transactional
+    public void existsByAdminTrue_ShouldReturnFalseWhenNoAdmin() {
+        // GIVEN
+        // No users in the database
+
+        // WHEN
+        boolean adminExists = usuarioRepository.existsByAdminTrue();
+
+        // THEN
+        assertThat(adminExists).isFalse();
+    }
+
+    @Test
+    @Transactional
+    public void existsByAdminTrue_ShouldReturnTrueWhenAdminExists() {
+        // GIVEN
+        Usuario adminUser = new Usuario("admin@ua");
+        adminUser.setNombre("Admin User");
+        adminUser.setPassword("adminpass");
+        adminUser.setAdmin(true);
+        usuarioRepository.save(adminUser);
+
+        // WHEN
+        boolean adminExists = usuarioRepository.existsByAdminTrue();
+
+        // THEN
+        assertThat(adminExists).isTrue();
+    }
 }

@@ -5,6 +5,7 @@ import madstodolist.dto.LoginData;
 import madstodolist.dto.RegistroData;
 import madstodolist.dto.UsuarioData;
 import madstodolist.service.UsuarioService;
+import madstodolist.service.UsuarioServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,10 +21,10 @@ import javax.validation.Valid;
 public class LoginController {
 
     @Autowired
-    UsuarioService usuarioService;
+    private UsuarioService usuarioService;
 
     @Autowired
-    ManagerUserSession managerUserSession;
+    private ManagerUserSession managerUserSession;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -61,7 +62,13 @@ public class LoginController {
 
     @GetMapping("/registro")
     public String registroForm(Model model) {
-        model.addAttribute("registroData", new RegistroData());
+        RegistroData registroData = new RegistroData();
+        model.addAttribute("registroData", registroData);
+
+        // Check if an admin already exists
+        boolean adminExists = usuarioService.existeAdministrador();
+        model.addAttribute("adminExists", adminExists);
+
         return "formRegistro";
     }
 
@@ -72,20 +79,31 @@ public class LoginController {
             return "formRegistro";
         }
 
+        // Check if admin registration is allowed
+        if (registroData.getAdmin() && usuarioService.existeAdministrador()) {
+            model.addAttribute("error", "Ya existe un administrador en el sistema");
+            return "formRegistro";
+        }
+
         if (usuarioService.findByEmail(registroData.getEmail()) != null) {
             model.addAttribute("registroData", registroData);
             model.addAttribute("error", "El usuario " + registroData.getEmail() + " ya existe");
             return "formRegistro";
         }
 
-        UsuarioData usuario = new UsuarioData();
-        usuario.setEmail(registroData.getEmail());
-        usuario.setPassword(registroData.getPassword());
-        usuario.setFechaNacimiento(registroData.getFechaNacimiento());
-        usuario.setNombre(registroData.getNombre());
+        try {
+            UsuarioData nuevoUsuario = usuarioService.registrar(registroData);
 
-        usuarioService.registrar(usuario);
-        return "redirect:/login";
+            // Redirect based on admin status
+            if (nuevoUsuario.getAdmin()) {
+                return "redirect:/registrados";
+            } else {
+                return "redirect:/login";
+            }
+        } catch (UsuarioServiceException e) {
+            model.addAttribute("error", e.getMessage());
+            return "formRegistro";
+        }
     }
 
     @GetMapping("/logout")

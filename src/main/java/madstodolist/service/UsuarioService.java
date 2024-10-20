@@ -1,5 +1,6 @@
 package madstodolist.service;
 
+import madstodolist.dto.RegistroData;
 import madstodolist.dto.UsuarioData;
 import madstodolist.model.Usuario;
 import madstodolist.repository.UsuarioRepository;
@@ -42,19 +43,36 @@ public class UsuarioService {
     // El email y password del usuario deben ser distinto de null
     // El email no debe estar registrado en la base de datos
     @Transactional
-    public UsuarioData registrar(UsuarioData usuario) {
-        Optional<Usuario> usuarioBD = usuarioRepository.findByEmail(usuario.getEmail());
+    public UsuarioData registrar(RegistroData registroData) {
+        Optional<Usuario> usuarioBD = usuarioRepository.findByEmail(registroData.getEmail());
         if (usuarioBD.isPresent())
-            throw new UsuarioServiceException("El usuario " + usuario.getEmail() + " ya está registrado");
-        else if (usuario.getEmail() == null)
+            throw new UsuarioServiceException("El usuario " + registroData.getEmail() + " ya está registrado");
+        else if (registroData.getEmail() == null)
             throw new UsuarioServiceException("El usuario no tiene email");
-        else if (usuario.getPassword() == null)
+        else if (registroData.getPassword() == null)
             throw new UsuarioServiceException("El usuario no tiene password");
         else {
-            Usuario usuarioNuevo = modelMapper.map(usuario, Usuario.class);
+            Usuario usuarioNuevo = modelMapper.map(registroData, Usuario.class);
+
+            // Check if setting admin is allowed
+            if (registroData.getAdmin()) {
+                if (existeAdministrador()) {
+                    throw new UsuarioServiceException("Ya existe un administrador en el sistema");
+                } else {
+                    usuarioNuevo.setAdmin(true);
+                }
+            } else {
+                usuarioNuevo.setAdmin(false);
+            }
+
             usuarioNuevo = usuarioRepository.save(usuarioNuevo);
             return modelMapper.map(usuarioNuevo, UsuarioData.class);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existeAdministrador() {
+        return usuarioRepository.existsByAdminTrue();
     }
 
     @Transactional(readOnly = true)

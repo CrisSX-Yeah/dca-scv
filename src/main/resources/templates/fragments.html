@@ -21,10 +21,11 @@
                     <a class="nav-link" th:href="@{/about}">ToDoList</a>
                 </li>
                 <!-- Conditionally render the "Tasks" link only if the user is logged in -->
-                <li class="nav-item">
+                <li class="nav-item" th:if="${usuario != null}">
                     <a class="nav-link" th:href="@{/tasks-auth}">Tasks</a>
                 </li>
-                <li class="nav-item">
+                <!-- Conditionally render the "Registrados" link only if the user is logged in and is an admin -->
+                <li class="nav-item" th:if="${usuario != null and usuario.admin}">
                     <a class="nav-link" th:href="@{/registrados}">Registrados</a>
                 </li>
             </ul>

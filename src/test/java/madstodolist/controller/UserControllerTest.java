@@ -335,4 +335,68 @@ public class UserControllerTest {
                 .andExpect(content().string("Permiso insuficiente para acceder a esta página."));
     }
 
+
+    @Test
+    @DisplayName("Navbar - Admin Usuario Puede Ver 'Registrados' y 'Tasks'")
+    public void navbar_AdminUser_ShouldShowRegistradosAndTasks() throws Exception {
+        // GIVEN
+        Long adminId = 1L;
+        UsuarioData adminUser = new UsuarioData();
+        adminUser.setId(adminId);
+        adminUser.setEmail("admin@ua");
+        adminUser.setNombre("Admin User");
+        adminUser.setAdmin(true);
+
+        when(managerUserSession.usuarioLogeado()).thenReturn(adminId);
+        when(usuarioService.findById(adminId)).thenReturn(adminUser);
+
+        // WHEN & THEN
+        mockMvc.perform(get("/about"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("about"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Registrados")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tasks")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Admin User")));
+    }
+
+    @Test
+    @DisplayName("Navbar - Usuario No Admin Puede Ver Solo 'Tasks'")
+    public void navbar_NonAdminUser_ShouldShowOnlyTasks() throws Exception {
+        // GIVEN
+        Long userId = 2L;
+        UsuarioData nonAdminUser = new UsuarioData();
+        nonAdminUser.setId(userId);
+        nonAdminUser.setEmail("user@ua");
+        nonAdminUser.setNombre("User Example");
+        nonAdminUser.setAdmin(false);
+
+        when(managerUserSession.usuarioLogeado()).thenReturn(userId);
+        when(usuarioService.findById(userId)).thenReturn(nonAdminUser);
+
+        // WHEN & THEN
+        mockMvc.perform(get("/about"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("about"))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Registrados"))))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tasks")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("User Example")));
+    }
+
+    @Test
+    @DisplayName("Navbar - Usuario No Logeado No Puede Ver 'Registrados' ni 'Tasks'")
+    public void navbar_UnauthenticatedUser_ShouldNotShowRegistradosOrTasks() throws Exception {
+        // GIVEN
+        when(managerUserSession.usuarioLogeado()).thenReturn(null);
+
+        // WHEN & THEN
+        mockMvc.perform(get("/about"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("about"))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Registrados"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Tasks"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Log out"))))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Login")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Register")));
+    }
+
 }

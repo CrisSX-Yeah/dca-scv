@@ -41,4 +41,5 @@ public class AdminInterceptor implements HandlerInterceptor {
         // User is admin, allow access
         return true;
     }
+
 }

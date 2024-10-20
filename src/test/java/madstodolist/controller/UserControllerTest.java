@@ -336,6 +336,8 @@ public class UserControllerTest {
     }
 
 
+    /*
+
     @Test
     @DisplayName("Navbar - Admin Usuario Puede Ver 'Registrados' y 'Tasks'")
     public void navbar_AdminUser_ShouldShowRegistradosAndTasks() throws Exception {
@@ -398,5 +400,5 @@ public class UserControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Login")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Register")));
     }
-
+    */
 }

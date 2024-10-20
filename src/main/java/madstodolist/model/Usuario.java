@@ -90,6 +90,7 @@ public class Usuario implements Serializable {
         return tareas;
     }
 
+
     public Boolean getAdmin() {
         return admin;
     }

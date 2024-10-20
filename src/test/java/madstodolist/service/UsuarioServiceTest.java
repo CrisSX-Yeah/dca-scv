@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.jdbc.Sql;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -193,4 +196,38 @@ public class UsuarioServiceTest {
         assertThat(user).isNotNull();
         assertThat(user.getAdmin()).isFalse();
     }
+
+    @Test
+    public void listarUsuarios_ShouldReturnOnlyNonAdminUsers() {
+        // GIVEN
+        // Register an admin user
+        RegistroData registroDataAdmin = new RegistroData();
+        registroDataAdmin.setEmail("admin@ua");
+        registroDataAdmin.setPassword("adminpass");
+        registroDataAdmin.setAdmin(true);
+        usuarioService.registrar(registroDataAdmin);
+
+        // Register two regular users
+        RegistroData registroDataUser1 = new RegistroData();
+        registroDataUser1.setEmail("user1@ua");
+        registroDataUser1.setPassword("userpass1");
+        registroDataUser1.setAdmin(false);
+        usuarioService.registrar(registroDataUser1);
+
+        RegistroData registroDataUser2 = new RegistroData();
+        registroDataUser2.setEmail("user2@ua");
+        registroDataUser2.setPassword("userpass2");
+        registroDataUser2.setAdmin(false);
+        usuarioService.registrar(registroDataUser2);
+
+        // WHEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<UsuarioData> usuariosPage = usuarioService.listarUsuarios(pageable);
+
+        // THEN
+        assertThat(usuariosPage.getTotalElements()).isEqualTo(2);
+        assertThat(usuariosPage.getContent()).extracting("email")
+                .containsExactlyInAnyOrder("user1@ua", "user2@ua");
+    }
+
 }

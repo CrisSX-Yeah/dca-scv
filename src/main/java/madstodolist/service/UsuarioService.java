@@ -96,7 +96,7 @@ public class UsuarioService {
     // New method to retrieve paginated list of users
     @Transactional(readOnly = true)
     public Page<UsuarioData> listarUsuarios(Pageable pageable) {
-        return usuarioRepository.findAll(pageable)
+        return usuarioRepository.findByAdminFalse(pageable)
                 .map(usuario -> modelMapper.map(usuario, UsuarioData.class));
     }
 }

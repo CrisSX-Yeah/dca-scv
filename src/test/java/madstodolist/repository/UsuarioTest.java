@@ -4,8 +4,11 @@ import madstodolist.model.Usuario;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -202,4 +205,40 @@ public class UsuarioTest {
         // THEN
         assertThat(adminExists).isTrue();
     }
+
+    @Test
+    @Transactional
+    public void findByAdminFalse_ShouldReturnOnlyNonAdminUsers() {
+        // GIVEN
+        // Create users: one admin and two non-admin
+        Usuario adminUser = new Usuario("admin@ua");
+        adminUser.setNombre("Admin User");
+        adminUser.setPassword("adminpass");
+        adminUser.setAdmin(true);
+        usuarioRepository.save(adminUser);
+
+        Usuario user1 = new Usuario("user1@ua");
+        user1.setNombre("User One");
+        user1.setPassword("userpass1");
+        user1.setAdmin(false);
+        usuarioRepository.save(user1);
+
+        Usuario user2 = new Usuario("user2@ua");
+        user2.setNombre("User Two");
+        user2.setPassword("userpass2");
+        user2.setAdmin(false);
+        usuarioRepository.save(user2);
+
+        // WHEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Usuario> nonAdminUsersPage = usuarioRepository.findByAdminFalse(pageable);
+
+        // THEN
+        assertThat(nonAdminUsersPage.getTotalElements()).isEqualTo(2);
+        assertThat(nonAdminUsersPage.getContent()).containsExactlyInAnyOrder(user1, user2);
+        assertThat(nonAdminUsersPage.getContent()).doesNotContain(adminUser);
+    }
+
+
+
 }

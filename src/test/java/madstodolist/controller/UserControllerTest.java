@@ -147,6 +147,43 @@ public class UserControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("01/01/1990")));
     }
 
+    @Test
+    public void listarUsuarios_ShouldNotIncludeAdminUser() throws Exception {
+        // GIVEN
+        UsuarioData adminUser = new UsuarioData();
+        adminUser.setId(1L);
+        adminUser.setEmail("admin@ua");
+        adminUser.setNombre("Admin User");
+        adminUser.setAdmin(true);
+
+        UsuarioData user1 = new UsuarioData();
+        user1.setId(2L);
+        user1.setEmail("user1@ua");
+        user1.setNombre("User One");
+        user1.setAdmin(false);
+
+        UsuarioData user2 = new UsuarioData();
+        user2.setId(3L);
+        user2.setEmail("user2@ua");
+        user2.setNombre("User Two");
+        user2.setAdmin(false);
+
+        Page<UsuarioData> usuariosPage = new PageImpl<>(Arrays.asList(user1, user2), PageRequest.of(0, 10), 2);
+
+        when(usuarioService.listarUsuarios(any(Pageable.class))).thenReturn(usuariosPage);
+
+        // WHEN & THEN
+        mockMvc.perform(get("/registrados"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("listaUsuarios"))
+                .andExpect(model().attributeExists("usuariosPage"))
+                .andExpect(model().attribute("usuariosPage", usuariosPage))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("user1@ua")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("user2@ua")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("admin@ua"))));
+    }
+
+
 
 
 

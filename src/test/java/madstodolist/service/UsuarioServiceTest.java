@@ -1,5 +1,6 @@
 package madstodolist.service;
 
+import madstodolist.dto.RegistroData;
 import madstodolist.dto.UsuarioData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,30 +17,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Sql(scripts = "/clean-db.sql")
 public class UsuarioServiceTest {
 
-
     @Autowired
     private UsuarioService usuarioService;
 
-    // Método para inicializar los datos de prueba en la BD con parámetros
-    Long addUsuarioBD(String email, String nombre) {
-        UsuarioData usuario = new UsuarioData();
-        usuario.setEmail(email);
-        usuario.setNombre(nombre);
-        usuario.setPassword("123");
-        UsuarioData nuevoUsuario = usuarioService.registrar(usuario);
-        return nuevoUsuario.getId();
-    }
-
-    // Manteniendo el método anterior por compatibilidad con otras pruebas
-    Long addUsuarioBD() {
-        return addUsuarioBD("user@ua", "Usuario Ejemplo");
+    // Helper method to create RegistroData DTO
+    private RegistroData createRegistroData(String email, String password, String nombre, boolean admin) {
+        RegistroData registroData = new RegistroData();
+        registroData.setEmail(email);
+        registroData.setPassword(password);
+        registroData.setNombre(nombre);
+        registroData.setAdmin(admin);
+        return registroData;
     }
 
     @Test
     public void servicioLoginUsuario() {
         // GIVEN
         // Un usuario en la BD
-        addUsuarioBD();
+        RegistroData registroData = createRegistroData("user@ua", "123", "Usuario Ejemplo", false);
+        usuarioService.registrar(registroData);
 
         // WHEN
         // intentamos logear un usuario y contraseña correctos
@@ -66,11 +62,8 @@ public class UsuarioServiceTest {
     public void servicioRegistroUsuario() {
         // WHEN
         // Registramos un usuario con un e-mail no existente en la base de datos
-        UsuarioData usuario = new UsuarioData();
-        usuario.setEmail("usuario.prueba2@gmail.com");
-        usuario.setPassword("12345678");
-
-        usuarioService.registrar(usuario);
+        RegistroData registroData = createRegistroData("usuario.prueba2@gmail.com", "12345678", "Usuario Prueba", false);
+        usuarioService.registrar(registroData);
 
         // THEN
         // el usuario se añade correctamente al sistema
@@ -83,11 +76,10 @@ public class UsuarioServiceTest {
     public void servicioRegistroUsuarioExcepcionConNullPassword() {
         // WHEN, THEN
         // Si intentamos registrar un usuario con un password null
-        UsuarioData usuario = new UsuarioData();
-        usuario.setEmail("usuario.prueba@gmail.com");
+        RegistroData registroData = createRegistroData("usuario.prueba@gmail.com", null, "Usuario Sin Password", false);
 
         Assertions.assertThrows(UsuarioServiceException.class, () -> {
-            usuarioService.registrar(usuario);
+            usuarioService.registrar(registroData);
         });
     }
 
@@ -95,16 +87,15 @@ public class UsuarioServiceTest {
     public void servicioRegistroUsuarioExcepcionConEmailRepetido() {
         // GIVEN
         // Un usuario en la BD
-        addUsuarioBD();
+        RegistroData registroData = createRegistroData("user@ua", "123", "Usuario Ejemplo", false);
+        usuarioService.registrar(registroData);
 
         // THEN
         // Si registramos un usuario con un e-mail ya existente en la base de datos
-        UsuarioData usuario = new UsuarioData();
-        usuario.setEmail("user@ua");
-        usuario.setPassword("12345678");
+        RegistroData registroDuplicado = createRegistroData("user@ua", "12345678", "Usuario Duplicado", false);
 
         Assertions.assertThrows(UsuarioServiceException.class, () -> {
-            usuarioService.registrar(usuario);
+            usuarioService.registrar(registroDuplicado);
         });
     }
 
@@ -112,11 +103,8 @@ public class UsuarioServiceTest {
     public void servicioRegistroUsuarioDevuelveUsuarioConId() {
         // WHEN
         // Registramos un usuario con un e-mail no existente en la base de datos
-        UsuarioData usuario = new UsuarioData();
-        usuario.setEmail("usuario.prueba@gmail.com");
-        usuario.setPassword("12345678");
-
-        UsuarioData usuarioNuevo = usuarioService.registrar(usuario);
+        RegistroData registroData = createRegistroData("usuario.prueba@gmail.com", "12345678", "Usuario Prueba", false);
+        UsuarioData usuarioNuevo = usuarioService.registrar(registroData);
 
         // THEN
         // se actualiza el identificador del usuario
@@ -131,7 +119,9 @@ public class UsuarioServiceTest {
     public void servicioConsultaUsuarioDevuelveUsuario() {
         // GIVEN
         // Un usuario en la BD
-        Long usuarioId = addUsuarioBD();
+        RegistroData registroData = createRegistroData("user@ua", "123", "Usuario Ejemplo", false);
+        UsuarioData usuarioNuevo = usuarioService.registrar(registroData);
+        Long usuarioId = usuarioNuevo.getId();
 
         // WHEN
         // recuperamos un usuario usando su e-mail
@@ -145,34 +135,100 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void servicioListarUsuariosPaginado() {
+    public void registrarAdmin_WhenNoAdminExists_ShouldSucceed() {
         // GIVEN
-        addUsuarioBD("user1@ua", "Usuario Uno");
-        addUsuarioBD("user2@ua", "Usuario Dos");
-        addUsuarioBD("user3@ua", "Usuario Tres");
+        RegistroData registroData = new RegistroData();
+        registroData.setEmail("admin@ua");
+        registroData.setPassword("adminpass");
+        registroData.setAdmin(true);
 
         // WHEN
-        Pageable pageable = PageRequest.of(0, 2); // Page 0 with 2 users per page
+        UsuarioData adminUser = usuarioService.registrar(registroData);
+
+        // THEN
+        assertThat(adminUser).isNotNull();
+        assertThat(adminUser.getAdmin()).isTrue();
+        assertThat(usuarioService.existeAdministrador()).isTrue();
+    }
+
+    @Test
+    public void registrarAdmin_WhenAdminExists_ShouldFail() {
+        // GIVEN
+        // First, register an admin user
+        RegistroData registroData1 = new RegistroData();
+        registroData1.setEmail("admin@ua");
+        registroData1.setPassword("adminpass");
+        registroData1.setAdmin(true);
+        usuarioService.registrar(registroData1);
+
+        // Attempt to register another admin
+        RegistroData registroData2 = new RegistroData();
+        registroData2.setEmail("admin2@ua");
+        registroData2.setPassword("adminpass2");
+        registroData2.setAdmin(true);
+
+        // WHEN & THEN
+        Assertions.assertThrows(UsuarioServiceException.class, () -> {
+            usuarioService.registrar(registroData2);
+        });
+    }
+
+    @Test
+    public void registrarUser_WhenAdminExists_ShouldSucceed() {
+        // GIVEN
+        // Register an admin user
+        RegistroData registroDataAdmin = new RegistroData();
+        registroDataAdmin.setEmail("admin@ua");
+        registroDataAdmin.setPassword("adminpass");
+        registroDataAdmin.setAdmin(true);
+        usuarioService.registrar(registroDataAdmin);
+
+        // Register a regular user
+        RegistroData registroDataUser = new RegistroData();
+        registroDataUser.setEmail("user@ua");
+        registroDataUser.setPassword("userpass");
+        registroDataUser.setAdmin(false);
+
+        // WHEN
+        UsuarioData user = usuarioService.registrar(registroDataUser);
+
+        // THEN
+        assertThat(user).isNotNull();
+        assertThat(user.getAdmin()).isFalse();
+    }
+
+    @Test
+    public void listarUsuarios_ShouldReturnOnlyNonAdminUsers() {
+        // GIVEN
+        // Register an admin user
+        RegistroData registroDataAdmin = new RegistroData();
+        registroDataAdmin.setEmail("admin@ua");
+        registroDataAdmin.setPassword("adminpass");
+        registroDataAdmin.setAdmin(true);
+        usuarioService.registrar(registroDataAdmin);
+
+        // Register two regular users
+        RegistroData registroDataUser1 = new RegistroData();
+        registroDataUser1.setEmail("user1@ua");
+        registroDataUser1.setPassword("userpass1");
+        registroDataUser1.setAdmin(false);
+        usuarioService.registrar(registroDataUser1);
+
+        RegistroData registroDataUser2 = new RegistroData();
+        registroDataUser2.setEmail("user2@ua");
+        registroDataUser2.setPassword("userpass2");
+        registroDataUser2.setAdmin(false);
+        usuarioService.registrar(registroDataUser2);
+
+        // WHEN
+        Pageable pageable = PageRequest.of(0, 10);
         Page<UsuarioData> usuariosPage = usuarioService.listarUsuarios(pageable);
 
         // THEN
-        assertThat(usuariosPage.getTotalElements()).isEqualTo(3); // Total 3 users in the system
-        assertThat(usuariosPage.getTotalPages()).isEqualTo(2); // 2 pages (3 users with page size 2)
-        assertThat(usuariosPage.getContent().size()).isEqualTo(2); // 2 users in the first page
-
-        // Check that the first page contains the correct users
-        UsuarioData usuario1 = usuariosPage.getContent().get(0);
-        UsuarioData usuario2 = usuariosPage.getContent().get(1);
-
-        assertThat(usuario1.getEmail()).isEqualTo("user1@ua");
-        assertThat(usuario2.getEmail()).isEqualTo("user2@ua");
-
-        // Check second page content
-        Pageable secondPage = PageRequest.of(1, 2); // Page 1 with 2 users per page
-        Page<UsuarioData> secondUsuariosPage = usuarioService.listarUsuarios(secondPage);
-        assertThat(secondUsuariosPage.getContent().size()).isEqualTo(1); // 1 user in the second page
-
-        UsuarioData usuario3 = secondUsuariosPage.getContent().get(0);
-        assertThat(usuario3.getEmail()).isEqualTo("user3@ua");
+        assertThat(usuariosPage.getTotalElements()).isEqualTo(2);
+        assertThat(usuariosPage.getContent()).extracting("email")
+                .containsExactlyInAnyOrder("user1@ua", "user2@ua");
     }
+
+
 }

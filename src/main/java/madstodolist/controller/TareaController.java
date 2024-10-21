@@ -132,6 +132,9 @@ public class TareaController {
         return "redirect:/usuarios/" + tarea.getUsuarioId() + "/tareas";
     }
 
+
+    // Old method to handle task deletion via GET
+    /*
     @DeleteMapping("/tareas/{id}")
     @ResponseBody
     public String borrarTarea(@PathVariable(value="id") Long idTarea, RedirectAttributes flash, HttpSession session) {
@@ -145,4 +148,5 @@ public class TareaController {
         tareaService.borraTarea(idTarea);
         return "";
     }
+     */
 }

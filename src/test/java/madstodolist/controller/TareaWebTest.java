@@ -110,20 +110,20 @@ public class TareaWebTest {
     }
 
     @Test
-    public void deleteTareaDevuelveOKyBorraTarea() throws Exception {
+    public void postDeleteTareaDevuelveRedirectyBorraTarea() throws Exception {
         Map<String, Long> ids = addUsuarioTareasBD();
         Long usuarioId = ids.get("usuarioId");
         Long tareaLavarCocheId = ids.get("tareaId");
         when(managerUserSession.usuarioLogeado()).thenReturn(usuarioId);
 
-        String urlDelete = "/tareas/" + tareaLavarCocheId.toString();
+        String urlDelete = "/tareas/" + tareaLavarCocheId.toString() + "/borrar";
+        String urlListado = "/usuarios/" + usuarioId + "/tareas";
 
-        this.mockMvc.perform(delete(urlDelete)
+        this.mockMvc.perform(post(urlDelete)
                         .with(csrf())
                         .with(user("user@ua")))
-                .andExpect(status().isOk());
-
-        String urlListado = "/usuarios/" + usuarioId + "/tareas";
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(urlListado));
 
         this.mockMvc.perform(get(urlListado).with(user("user@ua")))
                 .andExpect(content().string(allOf(

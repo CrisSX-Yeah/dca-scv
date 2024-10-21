@@ -155,8 +155,8 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("Descripción de Usuario No Existente - Admin Acceso Prohibido y Recibe 404")
-    public void descripcionUsuario_NoExistente_ShouldReturn404() throws Exception {
+    @DisplayName("Descripción de Usuario No Existente - Admin Acceso Prohibido y Recibe 401")
+    public void descripcionUsuario_NoExistente_ShouldReturn401() throws Exception {
         // GIVEN
         // Mock ManagerUserSession to simulate an admin user is logged in
         Long adminId = 1L;
@@ -311,8 +311,8 @@ public class UserControllerTest {
 
         // WHEN & THEN
         mockMvc.perform(get("/registrados"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Permiso insuficiente para acceder a esta página."));
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("404 - Página No Encontrada")));
     }
 
     @Test
@@ -331,8 +331,8 @@ public class UserControllerTest {
 
         // WHEN & THEN
         mockMvc.perform(get("/registrados/1"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Permiso insuficiente para acceder a esta página."));
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("404 - Página No Encontrada")));
     }
 
 

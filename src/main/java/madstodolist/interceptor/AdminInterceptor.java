@@ -1,10 +1,9 @@
 package madstodolist.interceptor;
 
 import madstodolist.authentication.ManagerUserSession;
-import madstodolist.controller.exception.UnauthorizedAccessException;
+import madstodolist.controller.exception.NotFoundException;
 import madstodolist.dto.UsuarioData;
 import madstodolist.service.UsuarioService;
-import madstodolist.controller.exception.UsuarioNoLogeadoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -26,16 +25,17 @@ public class AdminInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+
         Long userId = managerUserSession.usuarioLogeado();
         if (userId == null) {
             // User not logged in
-            throw new UsuarioNoLogeadoException();
+            throw new NotFoundException("Página no encontrada.");
         }
 
         UsuarioData usuario = usuarioService.findById(userId);
         if (usuario == null || !usuario.getAdmin()) {
             // User is not admin
-            throw new UnauthorizedAccessException("Permiso insuficiente para acceder a esta página.");
+            throw new NotFoundException("Página no encontrada.");
         }
 
         // User is admin, allow access

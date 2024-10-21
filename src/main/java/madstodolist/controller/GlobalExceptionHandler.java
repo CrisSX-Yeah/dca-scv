@@ -1,5 +1,6 @@
 package madstodolist.controller;
 
+import madstodolist.controller.exception.NotFoundException;
 import madstodolist.controller.exception.TareaNotFoundException;
 import madstodolist.controller.exception.UnauthorizedAccessException;
 import madstodolist.controller.exception.UsuarioNoLogeadoException;
@@ -33,6 +34,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedAccessException.class)
     public ResponseEntity<String> handleUnauthorizedAccessException(UnauthorizedAccessException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ModelAndView handleNotFoundException(NotFoundException ex) {
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("errorMessage", ex.getMessage());
+        mav.setViewName("error/404"); // Ensure you have a 404.html in src/main/resources/templates/error/
+        mav.setStatus(HttpStatus.NOT_FOUND);
+        return mav;
     }
 
     // Optionally, handle other exceptions

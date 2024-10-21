@@ -19,6 +19,8 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf; // Import CSRF
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user; // Import user
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -66,7 +68,7 @@ public class TareaWebTest {
 
         String url = "/usuarios/" + usuarioId.toString() + "/tareas";
 
-        this.mockMvc.perform(get(url))
+        this.mockMvc.perform(get(url).with(user("user@ua")))
                 .andExpect(content().string(allOf(
                         containsString("Lavar coche"),
                         containsString("Renovar DNI")
@@ -81,7 +83,7 @@ public class TareaWebTest {
         String urlPeticion = "/usuarios/" + usuarioId.toString() + "/tareas/nueva";
         String urlAction = "action=\"/usuarios/" + usuarioId.toString() + "/tareas/nueva\"";
 
-        this.mockMvc.perform(get(urlPeticion))
+        this.mockMvc.perform(get(urlPeticion).with(user("user@ua")))
                 .andExpect(content().string(allOf(
                         containsString("form method=\"post\""),
                         containsString(urlAction)
@@ -97,11 +99,13 @@ public class TareaWebTest {
         String urlRedirect = "/usuarios/" + usuarioId.toString() + "/tareas";
 
         this.mockMvc.perform(post(urlPost)
+                        .with(csrf())
+                        .with(user("user@ua"))
                         .param("titulo", "Estudiar examen MADS"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(urlRedirect));
 
-        this.mockMvc.perform(get(urlRedirect))
+        this.mockMvc.perform(get(urlRedirect).with(user("user@ua")))
                 .andExpect(content().string(containsString("Estudiar examen MADS")));
     }
 
@@ -114,12 +118,14 @@ public class TareaWebTest {
 
         String urlDelete = "/tareas/" + tareaLavarCocheId.toString();
 
-        this.mockMvc.perform(delete(urlDelete))
+        this.mockMvc.perform(delete(urlDelete)
+                        .with(csrf())
+                        .with(user("user@ua")))
                 .andExpect(status().isOk());
 
         String urlListado = "/usuarios/" + usuarioId + "/tareas";
 
-        this.mockMvc.perform(get(urlListado))
+        this.mockMvc.perform(get(urlListado).with(user("user@ua")))
                 .andExpect(content().string(allOf(
                         not(containsString("Lavar coche")),
                         containsString("Renovar DNI"))));
@@ -136,13 +142,15 @@ public class TareaWebTest {
         String urlRedirect = "/usuarios/" + usuarioId + "/tareas";
 
         this.mockMvc.perform(post(urlEditar)
+                        .with(csrf())
+                        .with(user("user@ua"))
                         .param("titulo", "Limpiar cristales coche"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(urlRedirect));
 
         String urlListado = "/usuarios/" + usuarioId + "/tareas";
 
-        this.mockMvc.perform(get(urlListado))
+        this.mockMvc.perform(get(urlListado).with(user("user@ua")))
                 .andExpect(content().string(containsString("Limpiar cristales coche")));
     }
 }

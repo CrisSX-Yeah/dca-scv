@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments :: head (titulo='Lista de Tareas')"></head>
+<head th:replace="fragments :: head (titulo='Lista de Tareas')">
+    <!-- Add CSRF meta tags -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+</head>
 
 <body>
 <div th:replace="fragments::menuBar"></div>
@@ -54,14 +58,19 @@
     </div>
 </div>
 
-<div th:replace="fragments::javascript"/>
+<div th:replace="fragments::javascript"></div>
 
 <!-- JavaScript for deleting a task -->
 <script type="text/javascript">
     function del(urlBorrar) {
         if (confirm('¿Estás seguro/a de que quieres borrar la tarea?')) {
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
             fetch(urlBorrar, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
             }).then((res) => location.reload());
         }
     }

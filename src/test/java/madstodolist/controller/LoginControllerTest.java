@@ -119,4 +119,5 @@ public class LoginControllerTest {
                 .andExpect(model().attributeExists("error"))
                 .andExpect(model().attribute("error", "Ya existe un administrador en el sistema"));
     }
+
 }

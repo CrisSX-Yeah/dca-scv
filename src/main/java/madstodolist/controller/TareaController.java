@@ -117,6 +117,24 @@ public class TareaController {
         return "redirect:/usuarios/" + tarea.getUsuarioId() + "/tareas";
     }
 
+    // New method to handle task deletion via POST
+    @PostMapping("/tareas/{id}/borrar")
+    public String borrarTarea(@PathVariable(value="id") Long idTarea, RedirectAttributes flash, Model model, HttpSession session) {
+        TareaData tarea = tareaService.findById(idTarea);
+        if (tarea == null) {
+            throw new TareaNotFoundException();
+        }
+
+        comprobarUsuarioLogeado(tarea.getUsuarioId());
+
+        tareaService.borraTarea(idTarea);
+        flash.addFlashAttribute("mensaje", "Tarea borrada correctamente");
+        return "redirect:/usuarios/" + tarea.getUsuarioId() + "/tareas";
+    }
+
+
+    // Old method to handle task deletion via GET
+    /*
     @DeleteMapping("/tareas/{id}")
     @ResponseBody
     public String borrarTarea(@PathVariable(value="id") Long idTarea, RedirectAttributes flash, HttpSession session) {
@@ -130,4 +148,5 @@ public class TareaController {
         tareaService.borraTarea(idTarea);
         return "";
     }
+     */
 }

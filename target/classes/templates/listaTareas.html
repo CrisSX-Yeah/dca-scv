@@ -5,67 +5,47 @@
 
 <body>
 <div th:replace="fragments::menuBar"></div>
-<div class="container-fluid">
+<div class="container mt-4">
+    <h2>Lista de Tareas</h2>
 
-    <div class="row mt-3">
-        <div class="col">
-            <h2 th:text="'Listado de tareas de ' + ${usuario.nombre}"></h2>
-        </div>
+    <!-- Flash Messages -->
+    <div th:if="${mensaje}" class="alert alert-success" role="alert">
+        <span th:text="${mensaje}"></span>
     </div>
 
-    <div class="row mt-3">
-        <div class="col">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Tarea</th>
-                    <th>Acción</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="tarea: ${tareas}">
-                    <td th:text="${tarea.id}"></td>
-                    <td th:text="${tarea.titulo}"></td>
-                    <td>
-                        <a class="btn btn-primary btn-xs" th:href="@{/tareas/{id}/editar(id=${tarea.id})}">editar</a>
-                        <button class="btn btn-danger btn-xs" style="cursor: pointer;"
-                                th:onclick="'del(\'/tareas/' + ${tarea.id} + '\')'">borrar
-                        </button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <p>
-                <a class="btn btn-primary" th:href="@{/usuarios/{id}/tareas/nueva(id=${usuario.id})}">Nueva tarea</a>
-            </p>
-        </div>
-    </div>
-    <div class="row mt-2">
-        <div class="col">
-            <div class="alert alert-success alert-dismissible fade show" role="alert"
-                 th:if="${!#strings.isEmpty(mensaje)}">
-                <span th:text="${mensaje}"></span>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        </div>
-    </div>
+    <table class="table table-striped mt-3">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="tarea : ${tareas}">
+            <td th:text="${tarea.id}"></td>
+            <td th:text="${tarea.titulo}"></td>
+            <td>
+                <!-- Edit Button -->
+                <a th:href="@{'/tareas/' + ${tarea.id} + '/editar'}" class="btn btn-primary btn-sm">Editar</a>
+
+                <!-- Delete Form -->
+                <form th:action="@{'/tareas/' + ${tarea.id} + '/borrar'}" method="post" style="display:inline;">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-danger btn-sm"
+                            onclick="return confirm('¿Estás seguro de que quieres borrar esta tarea?');">
+                        Borrar
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Link to Create New Task -->
+    <a th:href="@{'/usuarios/' + ${usuario.id} + '/tareas/nueva'}" class="btn btn-success">Nueva Tarea</a>
 </div>
 
-<div th:replace="fragments::javascript"/>
-
-<!-- JavaScript for deleting a task -->
-<script type="text/javascript">
-    function del(urlBorrar) {
-        if (confirm('¿Estás seguro/a de que quieres borrar la tarea?')) {
-            fetch(urlBorrar, {
-                method: 'DELETE'
-            }).then((res) => location.reload());
-        }
-    }
-</script>
-
+<div th:replace="fragments::javascript"></div>
 </body>
 </html>

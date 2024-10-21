@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -47,6 +48,12 @@ public class UserController {
         }
         model.addAttribute("usuario", usuario);
         return "usuarioDescripcion";
+    }
+
+    @PostMapping("/registrados/{id}/toggleBlock")
+    public String toggleUserBlockedStatus(@PathVariable Long id) {
+        usuarioService.toggleUserBlockedStatus(id);
+        return "redirect:/registrados";
     }
 
 }

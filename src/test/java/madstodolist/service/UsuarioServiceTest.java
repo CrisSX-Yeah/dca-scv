@@ -230,5 +230,41 @@ public class UsuarioServiceTest {
                 .containsExactlyInAnyOrder("user1@ua", "user2@ua");
     }
 
+    @Test
+    public void toggleUserBlockedStatus_ShouldToggleBlockedStatus() {
+        // GIVEN
+        RegistroData registroData = createRegistroData("user@ua", "123", "Usuario Ejemplo", false);
+        UsuarioData usuarioData = usuarioService.registrar(registroData);
+
+        // WHEN
+        usuarioService.toggleUserBlockedStatus(usuarioData.getId());
+        UsuarioData usuarioAfterBlock = usuarioService.findById(usuarioData.getId());
+
+        // THEN
+        assertThat(usuarioAfterBlock.getBlocked()).isTrue();
+
+        // WHEN
+        usuarioService.toggleUserBlockedStatus(usuarioData.getId());
+        UsuarioData usuarioAfterUnblock = usuarioService.findById(usuarioData.getId());
+
+        // THEN
+        assertThat(usuarioAfterUnblock.getBlocked()).isFalse();
+    }
+
+    @Test
+    public void login_WhenUserIsBlocked_ShouldReturnUserBlocked() {
+        // GIVEN
+        RegistroData registroData = createRegistroData("blocked@ua", "123", "Blocked User", false);
+        UsuarioData usuarioData = usuarioService.registrar(registroData);
+        usuarioService.toggleUserBlockedStatus(usuarioData.getId());
+
+        // WHEN
+        UsuarioService.LoginStatus loginStatus = usuarioService.login("blocked@ua", "123");
+
+        // THEN
+        assertThat(loginStatus).isEqualTo(UsuarioService.LoginStatus.USER_BLOCKED);
+    }
+
+
 
 }

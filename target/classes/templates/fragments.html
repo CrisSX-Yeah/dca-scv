@@ -4,7 +4,7 @@
 <head th:fragment="head (titulo)">
     <meta charset="UTF-8"/>
     <title th:text="${titulo}"></title>
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
 </head>
 
 <body>
@@ -21,10 +21,11 @@
                     <a class="nav-link" th:href="@{/about}">ToDoList</a>
                 </li>
                 <!-- Conditionally render the "Tasks" link only if the user is logged in -->
-                <li class="nav-item">
+                <li class="nav-item" th:if="${usuario != null}">
                     <a class="nav-link" th:href="@{/tasks-auth}">Tasks</a>
                 </li>
-                <li class="nav-item">
+                <!-- Conditionally render the "Registrados" link only if the user is logged in and is admin -->
+                <li class="nav-item" th:if="${usuario != null and usuario.admin}">
                     <a class="nav-link" th:href="@{/registrados}">Registrados</a>
                 </li>
             </ul>

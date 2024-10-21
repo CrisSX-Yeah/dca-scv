@@ -485,5 +485,4 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound()); // Expect 403 Forbidden
     }
 
-
 }

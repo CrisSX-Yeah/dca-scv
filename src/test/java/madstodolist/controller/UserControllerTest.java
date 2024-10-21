@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(controllers = UserController.class)
+@WebMvcTest(controllers = {UserController.class, HomeController.class})
 public class UserControllerTest {
 
     @Autowired
@@ -336,8 +336,6 @@ public class UserControllerTest {
     }
 
 
-    /*
-
     @Test
     @DisplayName("Navbar - Admin Usuario Puede Ver 'Registrados' y 'Tasks'")
     public void navbar_AdminUser_ShouldShowRegistradosAndTasks() throws Exception {
@@ -379,8 +377,11 @@ public class UserControllerTest {
         mockMvc.perform(get("/about"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("about"))
-                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Registrados"))))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tasks")))
+                // Check that the "Registrados" link does not exist
+                .andExpect(xpath("//a[@href='/registrados']").doesNotExist())
+                // Check that the "Tasks" link exists
+                .andExpect(xpath("//a[@href='/tasks-auth']").exists())
+                // Check that the user's name is displayed
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("User Example")));
     }
 
@@ -394,11 +395,16 @@ public class UserControllerTest {
         mockMvc.perform(get("/about"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("about"))
-                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Registrados"))))
-                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Tasks"))))
+                // Check that the "Registrados" link does not exist
+                .andExpect(xpath("//a[@href='/registrados']").doesNotExist())
+                // Check that the "Tasks" link does not exist
+                .andExpect(xpath("//a[@href='/tasks-auth']").doesNotExist())
+                // Check that "Log out" is not displayed
                 .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Log out"))))
+                // Check that "Login" and "Register" are displayed
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Login")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Register")));
     }
-    */
+
+
 }

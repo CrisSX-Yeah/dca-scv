@@ -27,9 +27,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 // Import necessary matchers
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.context.annotation.Import;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = {UserController.class, HomeController.class})
+@Import(TestCsrfControllerAdvice.class)
 public class UserControllerTest {
 
     @Autowired

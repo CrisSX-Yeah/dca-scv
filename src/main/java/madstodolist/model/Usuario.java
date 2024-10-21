@@ -33,6 +33,9 @@ public class Usuario implements Serializable {
     @OneToMany(mappedBy = "usuario")
     Set<Tarea> tareas = new HashSet<>();
 
+    @NotNull
+    private Boolean blocked = false;
+
     // Constructor vacío necesario para JPA/Hibernate.
     // No debe usarse desde la aplicación.
     public Usuario() {}
@@ -97,6 +100,14 @@ public class Usuario implements Serializable {
 
     public void setAdmin(Boolean admin) {
         this.admin = admin;
+    }
+
+    public Boolean getBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(Boolean blocked) {
+        this.blocked = blocked;
     }
 
     // Método helper para añadir una tarea a la lista y establecer la relación inversa

@@ -13,6 +13,7 @@
       <th>ID</th>
       <th>Email</th>
       <th>Descripción</th>
+      <th>Acción</th>
     </tr>
     </thead>
     <tbody>
@@ -22,6 +23,15 @@
       <td>
         <!-- Link to User Description -->
         <a th:href="@{'/registrados/' + ${usuario.id}}">Ver Descripción</a>
+      </td>
+      <td>
+        <!-- Form to toggle block/unblock status -->
+        <form th:action="@{'/registrados/' + ${usuario.id} + '/toggleBlock'}" method="post">
+          <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+          <button type="submit" class="btn btn-sm" th:classappend="${usuario.blocked} ? 'btn-success' : 'btn-danger'">
+            <span th:text="${usuario.blocked} ? 'desbloquear' : 'bloquear'"></span>
+          </button>
+        </form>
       </td>
     </tr>
     </tbody>

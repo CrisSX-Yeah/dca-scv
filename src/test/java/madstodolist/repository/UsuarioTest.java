@@ -239,6 +239,25 @@ public class UsuarioTest {
         assertThat(nonAdminUsersPage.getContent()).doesNotContain(adminUser);
     }
 
+    @Test
+    @Transactional
+    public void saveAndRetrieveBlockedStatus() {
+        // GIVEN
+        Usuario usuario = new Usuario("blocked@ua");
+        usuario.setNombre("Blocked User");
+        usuario.setPassword("blockedpass");
+        usuario.setBlocked(true);
+        usuarioRepository.save(usuario);
+
+        // WHEN
+        Usuario usuarioBD = usuarioRepository.findById(usuario.getId()).orElse(null);
+
+        // THEN
+        assertThat(usuarioBD).isNotNull();
+        assertThat(usuarioBD.getBlocked()).isTrue();
+    }
+
+
 
 
 }

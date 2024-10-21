@@ -20,7 +20,7 @@ public class UsuarioService {
 
     Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
-    public enum LoginStatus {LOGIN_OK, USER_NOT_FOUND, ERROR_PASSWORD}
+    public enum LoginStatus {LOGIN_OK, USER_NOT_FOUND, ERROR_PASSWORD, USER_BLOCKED}
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -34,6 +34,8 @@ public class UsuarioService {
             return LoginStatus.USER_NOT_FOUND;
         } else if (!usuario.get().getPassword().equals(password)) {
             return LoginStatus.ERROR_PASSWORD;
+        } else if (usuario.get().getBlocked()) {
+            return LoginStatus.USER_BLOCKED; // New check
         } else {
             return LoginStatus.LOGIN_OK;
         }
@@ -98,6 +100,17 @@ public class UsuarioService {
     public Page<UsuarioData> listarUsuarios(Pageable pageable) {
         return usuarioRepository.findByAdminFalse(pageable)
                 .map(usuario -> modelMapper.map(usuario, UsuarioData.class));
+    }
+
+    @Transactional
+    public void toggleUserBlockedStatus(Long userId) {
+        Usuario usuario = usuarioRepository.findById(userId).orElse(null);
+        if (usuario != null) {
+            usuario.setBlocked(!usuario.getBlocked());
+            usuarioRepository.save(usuario);
+        } else {
+            throw new UsuarioServiceException("Usuario no encontrado");
+        }
     }
 }
 

@@ -21,9 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 // Import necessary matchers
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
@@ -407,6 +409,57 @@ public class UserControllerTest {
     }
 
 
+    @Test
+    @DisplayName("Admin puede bloquear y desbloquear usuarios")
+    public void adminCanToggleUserBlockedStatus() throws Exception {
+        // GIVEN
+        Long adminId = 1L;
+        UsuarioData adminUser = new UsuarioData();
+        adminUser.setId(adminId);
+        adminUser.setEmail("admin@ua");
+        adminUser.setNombre("Admin User");
+        adminUser.setAdmin(true);
+
+        when(managerUserSession.usuarioLogeado()).thenReturn(adminId);
+        when(usuarioService.findById(adminId)).thenReturn(adminUser);
+
+        // Mock the user to be blocked/unblocked
+        UsuarioData userToToggle = new UsuarioData();
+        userToToggle.setId(2L);
+        userToToggle.setEmail("user@ua");
+        userToToggle.setNombre("User Example");
+        userToToggle.setAdmin(false);
+        userToToggle.setBlocked(false);
+
+        when(usuarioService.findById(2L)).thenReturn(userToToggle);
+
+        // WHEN & THEN
+        mockMvc.perform(post("/registrados/2/toggleBlock"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/registrados"));
+
+        // Verify that the service method was called
+        verify(usuarioService).toggleUserBlockedStatus(2L);
+    }
+
+    @Test
+    @DisplayName("No admin no puede bloquear usuarios")
+    public void nonAdminCannotToggleUserBlockedStatus() throws Exception {
+        // GIVEN
+        Long userId = 2L;
+        UsuarioData nonAdminUser = new UsuarioData();
+        nonAdminUser.setId(userId);
+        nonAdminUser.setEmail("user@ua");
+        nonAdminUser.setNombre("User Example");
+        nonAdminUser.setAdmin(false);
+
+        when(managerUserSession.usuarioLogeado()).thenReturn(userId);
+        when(usuarioService.findById(userId)).thenReturn(nonAdminUser);
+
+        // WHEN & THEN
+        mockMvc.perform(post("/registrados/3/toggleBlock"))
+                .andExpect(status().isNotFound()); // Because of AdminInterceptor
+    }
 
 
 }

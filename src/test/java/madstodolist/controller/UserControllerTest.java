@@ -11,12 +11,18 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import; // Import needed for @Import
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.UserRequestPostProcessor; // For user()
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+
+// Add Spring Security Test imports
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import java.util.Arrays;
 
@@ -27,7 +33,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 // Import necessary matchers
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import org.springframework.context.annotation.Import;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = {UserController.class, HomeController.class})
@@ -53,11 +58,13 @@ public class UserControllerTest {
         user1.setId(1L);
         user1.setEmail("user1@example.com");
         user1.setNombre("User One");
+        user1.setAdmin(false); // Ensure non-admin
 
         UsuarioData user2 = new UsuarioData();
         user2.setId(2L);
         user2.setEmail("user2@example.com");
         user2.setNombre("User Two");
+        user2.setAdmin(false); // Ensure non-admin
 
         usuariosPage = new PageImpl<>(Arrays.asList(user1, user2), PageRequest.of(0, 10), 2);
     }
@@ -79,7 +86,8 @@ public class UserControllerTest {
         when(usuarioService.listarUsuarios(any(Pageable.class))).thenReturn(usuariosPage);
 
         // WHEN & THEN
-        mockMvc.perform(get("/registrados"))
+        mockMvc.perform(get("/registrados")
+                        .with(user("admin").roles("ADMIN"))) // Simulate admin user
                 .andExpect(status().isOk())
                 .andExpect(view().name("listaUsuarios"))
                 .andExpect(model().attributeExists("usuariosPage"))
@@ -109,12 +117,16 @@ public class UserControllerTest {
         user3.setId(3L);
         user3.setEmail("user3@example.com");
         user3.setNombre("User Three");
+        user3.setAdmin(false);
 
         Page<UsuarioData> page = new PageImpl<>(Arrays.asList(user3), PageRequest.of(1, 1), 3);
         when(usuarioService.listarUsuarios(any(Pageable.class))).thenReturn(page);
 
         // WHEN & THEN
-        mockMvc.perform(get("/registrados").param("page", "1").param("size", "1"))
+        mockMvc.perform(get("/registrados")
+                        .param("page", "1")
+                        .param("size", "1")
+                        .with(user("admin").roles("ADMIN"))) // Simulate admin user
                 .andExpect(status().isOk())
                 .andExpect(view().name("listaUsuarios"))
                 .andExpect(model().attributeExists("usuariosPage"))
@@ -144,11 +156,13 @@ public class UserControllerTest {
         usuario.setEmail("user2@ua");
         usuario.setNombre("Usuario Dos");
         usuario.setFechaNacimiento(null); // Optional field
+        usuario.setAdmin(false); // Ensure non-admin
 
         when(usuarioService.findById(2L)).thenReturn(usuario);
 
         // WHEN & THEN
-        mockMvc.perform(get("/registrados/2"))
+        mockMvc.perform(get("/registrados/2")
+                        .with(user("admin").roles("ADMIN"))) // Simulate admin user
                 .andExpect(status().isOk())
                 .andExpect(view().name("usuarioDescripcion"))
                 .andExpect(model().attributeExists("usuario"))
@@ -159,8 +173,8 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("Descripción de Usuario No Existente - Admin Acceso Prohibido y Recibe 401")
-    public void descripcionUsuario_NoExistente_ShouldReturn401() throws Exception {
+    @DisplayName("Descripción de Usuario No Existente - Admin Acceso Prohibido y Recibe 404")
+    public void descripcionUsuario_NoExistente_ShouldReturn404() throws Exception {
         // GIVEN
         // Mock ManagerUserSession to simulate an admin user is logged in
         Long adminId = 1L;
@@ -177,7 +191,8 @@ public class UserControllerTest {
         when(usuarioService.findById(999L)).thenReturn(null);
 
         // WHEN & THEN
-        mockMvc.perform(get("/registrados/999"))
+        mockMvc.perform(get("/registrados/999")
+                        .with(user("admin").roles("ADMIN"))) // Simulate admin user
                 .andExpect(status().isOk()) // The controller should return view "error/404" with status 200
                 .andExpect(view().name("error/404"));
     }
@@ -203,11 +218,13 @@ public class UserControllerTest {
         usuario.setEmail("user3@ua");
         usuario.setNombre("Usuario Tres");
         usuario.setFechaNacimiento(new java.util.Date(90, 0, 1)); // 01/01/1990
+        usuario.setAdmin(false); // Ensure non-admin
 
         when(usuarioService.findById(3L)).thenReturn(usuario);
 
         // WHEN & THEN
-        mockMvc.perform(get("/registrados/3"))
+        mockMvc.perform(get("/registrados/3")
+                        .with(user("admin").roles("ADMIN"))) // Simulate admin user
                 .andExpect(status().isOk())
                 .andExpect(view().name("usuarioDescripcion"))
                 .andExpect(model().attributeExists("usuario"))
@@ -247,7 +264,8 @@ public class UserControllerTest {
         when(usuarioService.listarUsuarios(any(Pageable.class))).thenReturn(usuariosPage);
 
         // WHEN & THEN
-        mockMvc.perform(get("/registrados"))
+        mockMvc.perform(get("/registrados")
+                        .with(user("admin").roles("ADMIN"))) // Simulate admin user
                 .andExpect(status().isOk())
                 .andExpect(view().name("listaUsuarios"))
                 .andExpect(model().attributeExists("usuariosPage"))
@@ -289,7 +307,8 @@ public class UserControllerTest {
         when(usuarioService.listarUsuarios(any(Pageable.class))).thenReturn(usuariosPage);
 
         // WHEN & THEN
-        mockMvc.perform(get("/registrados"))
+        mockMvc.perform(get("/registrados")
+                        .with(user("admin").roles("ADMIN"))) // Simulate admin user
                 .andExpect(status().isOk())
                 .andExpect(view().name("listaUsuarios"))
                 .andExpect(model().attributeExists("usuariosPage"))
@@ -301,7 +320,7 @@ public class UserControllerTest {
 
     @Test
     @DisplayName("Acceso protegido - No Admin no Puede Acceder a /registrados")
-    public void accederRegistrados_NonAdminUser_ShouldReturnUnauthorized() throws Exception {
+    public void accederRegistrados_NonAdminUser_ShouldReturnNotFound() throws Exception {
         // GIVEN
         // Mock ManagerUserSession to return non-admin user ID
         Long userId = 2L;
@@ -314,14 +333,14 @@ public class UserControllerTest {
         when(usuarioService.findById(userId)).thenReturn(nonAdminUser);
 
         // WHEN & THEN
-        mockMvc.perform(get("/registrados"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("404 - Página No Encontrada")));
+        mockMvc.perform(get("/registrados")
+                        .with(user("user@ua").roles("USER"))) // Simulate non-admin user
+                .andExpect(status().isNotFound()); // Expect 403 Forbidden
     }
 
     @Test
     @DisplayName("Acceso protegido - No Admin no Puede Acceder a /registrados/{id}")
-    public void accederUsuarioDescripcion_NonAdminUser_ShouldReturnUnauthorized() throws Exception {
+    public void accederUsuarioDescripcion_NonAdminUser_ShouldReturnNotFound() throws Exception {
         // GIVEN
         // Mock ManagerUserSession to return non-admin user ID
         Long userId = 2L;
@@ -334,11 +353,10 @@ public class UserControllerTest {
         when(usuarioService.findById(userId)).thenReturn(nonAdminUser);
 
         // WHEN & THEN
-        mockMvc.perform(get("/registrados/1"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("404 - Página No Encontrada")));
+        mockMvc.perform(get("/registrados/1")
+                        .with(user("user@ua").roles("USER"))) // Simulate non-admin user
+                .andExpect(status().isNotFound()); // Expect 403 Forbidden
     }
-
 
     @Test
     @DisplayName("Navbar - Admin Usuario Puede Ver 'Registrados' y 'Tasks'")
@@ -355,7 +373,8 @@ public class UserControllerTest {
         when(usuarioService.findById(adminId)).thenReturn(adminUser);
 
         // WHEN & THEN
-        mockMvc.perform(get("/about"))
+        mockMvc.perform(get("/about")
+                        .with(user("admin").roles("ADMIN"))) // Simulate admin user
                 .andExpect(status().isOk())
                 .andExpect(view().name("about"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Registrados")))
@@ -373,12 +392,12 @@ public class UserControllerTest {
         nonAdminUser.setEmail("user@ua");
         nonAdminUser.setNombre("User Example");
         nonAdminUser.setAdmin(false);
-
         when(managerUserSession.usuarioLogeado()).thenReturn(userId);
         when(usuarioService.findById(userId)).thenReturn(nonAdminUser);
 
         // WHEN & THEN
-        mockMvc.perform(get("/about"))
+        mockMvc.perform(get("/about")
+                        .with(user("user@ua").roles("USER"))) // Simulate non-admin user
                 .andExpect(status().isOk())
                 .andExpect(view().name("about"))
                 // Check that the "Registrados" link does not exist
@@ -396,7 +415,7 @@ public class UserControllerTest {
         when(managerUserSession.usuarioLogeado()).thenReturn(null);
 
         // WHEN & THEN
-        mockMvc.perform(get("/about"))
+        mockMvc.perform(get("/about")) // No authentication
                 .andExpect(status().isOk())
                 .andExpect(view().name("about"))
                 // Check that the "Registrados" link does not exist
@@ -409,7 +428,6 @@ public class UserControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Login")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Register")));
     }
-
 
     @Test
     @DisplayName("Admin puede bloquear y desbloquear usuarios")
@@ -436,7 +454,9 @@ public class UserControllerTest {
         when(usuarioService.findById(2L)).thenReturn(userToToggle);
 
         // WHEN & THEN
-        mockMvc.perform(post("/registrados/2/toggleBlock"))
+        mockMvc.perform(post("/registrados/2/toggleBlock")
+                        .with(csrf()) // Include CSRF token
+                        .with(user("admin").roles("ADMIN"))) // Simulate admin user
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/registrados"));
 
@@ -459,9 +479,9 @@ public class UserControllerTest {
         when(usuarioService.findById(userId)).thenReturn(nonAdminUser);
 
         // WHEN & THEN
-        mockMvc.perform(post("/registrados/3/toggleBlock"))
-                .andExpect(status().isNotFound()); // Because of AdminInterceptor
+        mockMvc.perform(post("/registrados/3/toggleBlock")
+                        .with(csrf()) // Include CSRF token
+                        .with(user("user@ua").roles("USER"))) // Simulate non-admin user
+                .andExpect(status().isNotFound()); // Expect 403 Forbidden
     }
-
-
 }

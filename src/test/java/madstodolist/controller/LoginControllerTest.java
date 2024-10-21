@@ -16,9 +16,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+// Add Spring Security Test imports
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-// Import necessary matchers
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 // Import necessary matchers
@@ -73,7 +74,7 @@ public class LoginControllerTest {
 
     @Test
     @DisplayName("Registro - Successful Admin Registration")
-    public void registro_AdminRegistration_ShouldRedirectToRegistrados() throws Exception {
+    public void registro_AdminRegistration_ShouldRedirectToLogin() throws Exception {
         // GIVEN
         when(usuarioService.existeAdministrador()).thenReturn(false);
         RegistroData registroData = new RegistroData();
@@ -90,6 +91,7 @@ public class LoginControllerTest {
 
         // WHEN & THEN
         mockMvc.perform(post("/registro")
+                        .with(csrf()) // Include CSRF token
                         .param("email", "admin@ua")
                         .param("password", "adminpass")
                         .param("admin", "true"))
@@ -108,6 +110,7 @@ public class LoginControllerTest {
 
         // WHEN & THEN
         mockMvc.perform(post("/registro")
+                        .with(csrf()) // Include CSRF token
                         .param("email", "admin2@ua")
                         .param("password", "adminpass2")
                         .param("admin", "true"))

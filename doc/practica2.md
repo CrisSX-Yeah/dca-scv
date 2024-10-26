@@ -24,9 +24,6 @@ All the issues and pull requests are included in [the original GitHub repository
 
 
 
-
-
-
 # ToDoList Application: Features Implemented in 1.1.0 release
 
 ## "002 NavBar" Feature

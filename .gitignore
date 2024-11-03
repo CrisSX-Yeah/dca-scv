@@ -35,10 +35,6 @@ out/
 *.swp
 *.swo
 
-# Maven Wrapper files
-.mvn/wrapper/maven-wrapper.jar
-.mvn/wrapper/maven-wrapper.properties
-
 # User-specific files
 *.user
 *.orig

@@ -1,0 +1,15 @@
+name: Tests
+
+on: push
+
+jobs:
+  launch-tests:
+    runs-on: ubuntu-latest
+    container: openjdk:8-jdk  # No need for Maven installation if using `mvnw`
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+      - name: Launch tests with Maven Wrapper
+        run: ./mvnw test

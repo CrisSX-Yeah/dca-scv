@@ -18,6 +18,7 @@
         <tr>
             <th>ID</th>
             <th>Título</th>
+            <th>Número de Horas</th>
             <th>Acciones</th>
         </tr>
         </thead>
@@ -25,6 +26,7 @@
         <tr th:each="tarea : ${tareas}">
             <td th:text="${tarea.id}"></td>
             <td th:text="${tarea.titulo}"></td>
+            <td th:text="${tarea.hours}"></td>
             <td>
                 <!-- Edit Button -->
                 <a th:href="@{'/tareas/' + ${tarea.id} + '/editar'}" class="btn btn-primary btn-sm">Editar</a>
@@ -37,6 +39,15 @@
                         Borrar
                     </button>
                 </form>
+                <a th:href="@{'/tareas/' + ${tarea.id} + '/asignarHoras'}" class="btn btn-primary btn-sm"
+                   style="background-color: darkblue; border-color: darkblue;">Asignar Horas</a>
+
+                <form th:action="@{'/tareas/' + ${tarea.id} + '/incrementarHoras'}" method="post" style="display:inline;">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-danger btn-sm"  style="background-color: purple; border-color: purple;">
+                        Incrementar Una Hora
+                    </button>
+                </form>
             </td>
         </tr>
         </tbody>
@@ -44,6 +55,9 @@
 
     <!-- Link to Create New Task -->
     <a th:href="@{'/usuarios/' + ${usuario.id} + '/tareas/nueva'}" class="btn btn-success">Nueva Tarea</a>
+    <span>Promedio de las horas de todas las tareas: </span>
+    <span th:text="${usuario.promedioTareas}"> </span>
+
 </div>
 
 <div th:replace="fragments::javascript"></div>

@@ -245,4 +245,53 @@ public class TareaTest {
         Tarea tareaBD = tareaRepository.findById(tareaId).orElse(null);
         assertThat(tareaBD.getTitulo()).isEqualTo(tarea.getTitulo());
     }
+
+
+
+    //A partir de aquí son tests añadidos por mí.
+
+    @Test
+    @Transactional
+    public void asignarHorasAUnaTareaYCalculasPromedioDeUsuario() {
+        // GIVEN
+        // Un usuario y una tarea en la base de datos
+        Usuario usuario = new Usuario("user@ua");
+        usuarioRepository.save(usuario);
+
+        Tarea tarea = new Tarea(usuario, "Práctica 1 de MADS");
+        tareaRepository.save(tarea);
+
+        Tarea tarea2 = new Tarea(usuario, "Práctica 2 de MADS");
+        tareaRepository.save(tarea2);
+
+        Tarea tarea3 = new Tarea(usuario, "Práctica 3 de MADS");
+        tareaRepository.save(tarea3);
+
+        // Recuperamos las tareas
+        Long tareaId = tarea.getId();
+        Long tareaId2 = tarea2.getId();
+        Long tareaId3 = tarea3.getId();
+
+        tarea = tareaRepository.findById(tareaId).orElse(null);
+        tarea2 = tareaRepository.findById(tareaId2).orElse(null);
+        tarea3 = tareaRepository.findById(tareaId3).orElse(null);
+        // WHEN
+        // modificamos la descripción de la tarea
+
+        tarea.setHours(4);
+        tarea2.setHours(6);
+        tarea3.setHours(5);
+
+        // THEN
+
+
+        Tarea tareaBD = tareaRepository.findById(tareaId).orElse(null);
+        Usuario usuarioBD = usuarioRepository.findByEmail("user@ua").orElse(null);
+        assertThat(tareaBD.getHours()).isEqualTo(tarea.getHours());
+        assertThat(usuarioBD.getPromedioTareas()).isEqualTo(usuario.getPromedioTareas());
+
+    }
+
 }
+
+

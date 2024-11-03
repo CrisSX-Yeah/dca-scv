@@ -98,4 +98,53 @@ public class TareaService {
         }
         return usuario.getTareas().contains(tarea);
     }
+
+
+
+    @Transactional
+    public TareaData asignarHoras(Long idTarea, int hours) {
+        logger.debug("Asignando horas a la tarea" + idTarea);
+        Tarea tarea = tareaRepository.findById(idTarea).orElse(null);
+        if (tarea == null) {
+            throw new TareaServiceException("No existe tarea con id " + idTarea);
+        }
+        tarea.setHours(hours);
+        tarea = tareaRepository.save(tarea);
+        return modelMapper.map(tarea, TareaData.class);
+    }
+
+    @Transactional
+    public TareaData incrementarHoras(Long idTarea) {
+        logger.debug("Incrementando horas a la tarea" + idTarea);
+        Tarea tarea = tareaRepository.findById(idTarea).orElse(null);
+        if (tarea == null) {
+            throw new TareaServiceException("No existe tarea con id " + idTarea);
+        }
+        int incrementedHours = tarea.getHours() + 1;
+        tarea.setHours(incrementedHours);
+        return modelMapper.map(tarea, TareaData.class);
+    }
+
+    @Transactional
+    public void calcularPromedioHoras(Long idUsuario) {
+        logger.debug("Calculando el promedio de las horas de las tareas del usuario " + idUsuario);
+        Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+        if (usuario == null) {
+            throw new TareaServiceException("Usuario " + idUsuario + " no existe al listar tareas ");
+        }
+        List<TareaData> tareas = usuario.getTareas().stream()
+                .map(tarea -> modelMapper.map(tarea, TareaData.class))
+                .collect(Collectors.toList());
+        Collections.sort(tareas, (a, b) -> a.getId() < b.getId() ? -1 : a.getId() == b.getId() ? 0 : 1);
+
+        int totalTimeTareas = 0;
+        int numberOfTareas = tareas.size();
+        for (TareaData tarea : tareas) {
+            totalTimeTareas += tarea.getHours();
+        }
+
+        float promedioTareas = (float) totalTimeTareas / numberOfTareas;
+        usuario.setPromedioTareas(promedioTareas);
+    }
+
 }

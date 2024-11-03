@@ -33,8 +33,13 @@ public class Usuario implements Serializable {
     @OneToMany(mappedBy = "usuario")
     Set<Tarea> tareas = new HashSet<>();
 
+    @OneToMany(mappedBy = "usuario")
+    Set<Recurso> recursos = new HashSet<>();
+
     @NotNull
     private Boolean blocked = false;
+
+    public float promedioTareas;
 
     // Constructor vacío necesario para JPA/Hibernate.
     // No debe usarse desde la aplicación.
@@ -102,12 +107,26 @@ public class Usuario implements Serializable {
         this.admin = admin;
     }
 
+
+
     public Boolean getBlocked() {
         return blocked;
     }
 
     public void setBlocked(Boolean blocked) {
         this.blocked = blocked;
+    }
+
+    public Set<Recurso> getRecursos() {
+        return recursos;
+    }
+
+    public float getPromedioTareas() {
+        return this.promedioTareas;
+    }
+
+    public void setPromedioTareas(float promedioTareas) {
+        this.promedioTareas = promedioTareas;
     }
 
     // Método helper para añadir una tarea a la lista y establecer la relación inversa
@@ -119,6 +138,14 @@ public class Usuario implements Serializable {
         // Establecemos la relación inversa del usuario en la tarea
         if (tarea.getUsuario() != this) {
             tarea.setUsuario(this);
+        }
+    }
+
+    public void addRecurso(Recurso recurso) {
+        if (recursos.contains(recurso)) return;
+        recursos.add(recurso);
+        if (recurso.getUsuario() != this) {
+            recurso.setUsuario(this);
         }
     }
 

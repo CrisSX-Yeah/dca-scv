@@ -18,6 +18,9 @@ public class Tarea implements Serializable {
     private String titulo;
 
     @NotNull
+    private int hours;
+
+    @NotNull
     // Relación muchos-a-uno entre tareas y usuario
     @ManyToOne
     // Nombre de la columna en la BD que guarda físicamente
@@ -68,6 +71,14 @@ public class Tarea implements Serializable {
             // Añade la tarea a la lista de tareas del usuario
             usuario.addTarea(this);
         }
+    }
+
+    public int getHours() {
+        return this.hours;
+    }
+
+    public void setHours(int hours) {
+        this.hours = hours;
     }
 
     @Override

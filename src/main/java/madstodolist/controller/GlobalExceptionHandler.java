@@ -1,9 +1,6 @@
 package madstodolist.controller;
 
-import madstodolist.controller.exception.NotFoundException;
-import madstodolist.controller.exception.TareaNotFoundException;
-import madstodolist.controller.exception.UnauthorizedAccessException;
-import madstodolist.controller.exception.UsuarioNoLogeadoException;
+import madstodolist.controller.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -38,6 +35,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ModelAndView handleNotFoundException(NotFoundException ex) {
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("errorMessage", ex.getMessage());
+        mav.setViewName("error/404"); // Ensure you have a 404.html in src/main/resources/templates/error/
+        mav.setStatus(HttpStatus.NOT_FOUND);
+        return mav;
+    }
+
+    @ExceptionHandler(RecursoNotFoundException.class)
+    public ModelAndView handleRecursoNotFoundException(RecursoNotFoundException ex) {
         ModelAndView mav = new ModelAndView();
         mav.addObject("errorMessage", ex.getMessage());
         mav.setViewName("error/404"); // Ensure you have a 404.html in src/main/resources/templates/error/

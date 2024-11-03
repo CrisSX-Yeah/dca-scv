@@ -13,6 +13,7 @@ public class UsuarioData {
     private Date fechaNacimiento;
     private Boolean admin = false;
     private Boolean blocked = false;
+    private float promedioTareas;
 
     // Getters y setters
 
@@ -66,6 +67,14 @@ public class UsuarioData {
 
     public void setBlocked(Boolean blocked) {
         this.blocked = blocked;
+    }
+
+    public float getPromedioTareas() {
+        return promedioTareas;
+    }
+
+    public void setPromedioTareas(float promedioTareas) {
+        this.promedioTareas = promedioTareas;
     }
 
     // Sobreescribimos equals y hashCode para que dos usuarios sean iguales

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments :: head (titulo='Nuevo Recurso')"></head>
+
+<body>
+<div th:replace="fragments::menuBar"></div>
+<div class="container mt-4">
+  <h2>Nuevo Recurso</h2>
+
+  <form th:action="@{'/usuarios/' + ${usuario.id} + '/recursos/nuevo'}" th:object="${recursoData}" method="post">
+    <div class="form-group">
+      <label for="nombre">Nombre del Recurso</label>
+      <input type="text" class="form-control" id="nombre" th:field="*{nombre}" placeholder="Ingrese el nombre del recurso" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Crear</button>
+    <a th:href="@{'/usuarios/' + ${usuario.id} + '/recursos'}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+
+<div th:replace="fragments::javascript"></div>
+</body>
+</html>

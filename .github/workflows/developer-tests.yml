@@ -1,9 +1,9 @@
-name: Tests
+name: Developer Tests
 
 on: push
 
 jobs:
-  launch-tests:
+  Developer-Tests:
     runs-on: ubuntu-latest
     container: openjdk:8-jdk  # No need for Maven installation if using `mvnw`
 

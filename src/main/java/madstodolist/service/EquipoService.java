@@ -4,7 +4,9 @@ import madstodolist.dto.EquipoData;
 import madstodolist.dto.TareaData;
 import madstodolist.dto.UsuarioData;
 import madstodolist.model.Equipo;
+import madstodolist.model.Usuario;
 import madstodolist.repository.EquipoRepository;
+import madstodolist.repository.UsuarioRepository;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,9 @@ public class EquipoService {
 
     @Autowired
     EquipoRepository equipoRepository;
+
+    @Autowired
+    UsuarioRepository usuarioRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -56,6 +61,24 @@ public class EquipoService {
 
         return equipos;
     }
+
+
+    @Transactional
+    public void añadirUsuarioAEquipo(Long id, Long id1) {
+        Equipo equipo = equipoRepository.findById(id).orElse(null);
+        Usuario usuario = usuarioRepository.findById(id1).orElse(null);
+        equipo.addUsuario(usuario);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UsuarioData> usuariosEquipo(Long id) {
+        Equipo equipo = equipoRepository.findById(id).orElse(null);
+        // Hacemos uso de Java Stream API para mapear la lista de entidades a DTOs.
+        return equipo.getUsuarios().stream()
+                .map(usuario -> modelMapper.map(usuario, UsuarioData.class))
+                .collect(Collectors.toList());
+    }
+
 
 
 }

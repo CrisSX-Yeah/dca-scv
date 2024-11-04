@@ -1,5 +1,7 @@
 package madstodolist.service;
 
+import madstodolist.dto.RegistroData;
+import madstodolist.dto.UsuarioData;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import madstodolist.dto.EquipoData;
@@ -14,6 +16,9 @@ public class EquipoServiceTest {
 
     @Autowired
     EquipoService equipoService;
+
+    @Autowired
+    UsuarioService usuarioService;
 
     @Test
     public void crearRecuperarEquipo() {
@@ -47,7 +52,28 @@ public class EquipoServiceTest {
         assertThat(equipos.get(2).getNombre()).isEqualTo("Proyecto CCC");
         assertThat(equipos.get(3).getNombre()).isEqualTo("Proyecto DDD");
         assertThat(equipos.get(4).getNombre()).isEqualTo("Proyecto EEE");
-
-
     }
+
+    @Test
+    public void añadirUsuarioAEquipo() {
+        // GIVEN
+        // A new user and a team in the database
+        RegistroData registroData = new RegistroData();
+        registroData.setEmail("user@ua");
+        registroData.setPassword("123");
+        UsuarioData usuario = usuarioService.registrar(registroData);  // Register the user with RegistroData
+
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+
+        // WHEN
+        // Add the user to the team
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+
+        // THEN
+        // Check that the user belongs to the team
+        List<UsuarioData> usuarios = equipoService.usuariosEquipo(equipo.getId());
+        assertThat(usuarios).hasSize(1);
+        assertThat(usuarios.get(0).getEmail()).isEqualTo("user@ua");
+    }
+
 }

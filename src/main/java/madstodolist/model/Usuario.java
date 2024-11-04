@@ -36,6 +36,9 @@ public class Usuario implements Serializable {
     @OneToMany(mappedBy = "usuario")
     Set<Recurso> recursos = new HashSet<>();
 
+    @ManyToMany(mappedBy = "usuarios")
+    Set<Equipo> equipos = new HashSet<>();
+
     @NotNull
     private Boolean blocked = false;
 
@@ -127,6 +130,10 @@ public class Usuario implements Serializable {
 
     public void setPromedioTareas(float promedioTareas) {
         this.promedioTareas = promedioTareas;
+    }
+
+    public Set<Equipo> getEquipos() {
+        return equipos;
     }
 
     // Método helper para añadir una tarea a la lista y establecer la relación inversa

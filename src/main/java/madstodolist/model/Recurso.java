@@ -15,6 +15,7 @@ public class Recurso implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    
     @NotNull
     private String nombre;
 

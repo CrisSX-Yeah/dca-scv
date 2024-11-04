@@ -1,0 +1,32 @@
+name: Integration Tests
+
+on: push
+
+jobs:
+  Integration-Tests:
+    runs-on: ubuntu-latest
+    container: openjdk:8-jdk
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: mads
+          POSTGRES_PASSWORD: mads
+          POSTGRES_DB: mads_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Make mvnw Executable
+        run: chmod +x ./mvnw
+      - name: Run Integration Tests
+        run: ./mvnw test -Dspring.profiles.active=postgres
+        env:
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: mads
+          POSTGRES_PASSWORD: mads

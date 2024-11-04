@@ -25,8 +25,14 @@ public class Equipo implements Serializable {
         this.nombre = nombre;
     }
 
+    public Long getId() {
+        return this.id;
+    }
+
     public String getNombre() {
         return this.nombre;
     }
+
+
 
 }

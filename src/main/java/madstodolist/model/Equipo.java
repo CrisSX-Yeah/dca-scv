@@ -56,6 +56,8 @@ public class Equipo implements Serializable {
 
     // ...
 
+
+
     public Set<Usuario> getUsuarios() {
         return usuarios;
     }

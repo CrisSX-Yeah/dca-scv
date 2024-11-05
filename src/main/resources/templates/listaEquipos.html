@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments :: head (titulo='Lista de Equipos')"></head>
+
+<body>
+<div th:replace="fragments::menuBar"></div>
+<div class="container mt-4">
+    <h2>Lista de Equipos</h2>
+
+    <!-- Flash Messages -->
+    <div th:if="${mensaje}" class="alert alert-success" role="alert">
+        <span th:text="${mensaje}"></span>
+    </div>
+
+    <table class="table table-striped mt-3">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Ver Miembros del Equipo</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="equipo : ${equipos}">
+            <td th:text="${equipo.id}"></td>
+            <td th:text="${equipo.nombre}"></td>
+            <td>
+            <a th:href="@{'/registrados/' + ${usuario.id}}">Ver Miembros del Equipo</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<div th:replace="fragments::javascript"></div>
+</body>
+</html>

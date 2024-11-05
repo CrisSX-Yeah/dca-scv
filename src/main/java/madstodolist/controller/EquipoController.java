@@ -2,7 +2,9 @@ package madstodolist.controller;
 
 import madstodolist.controller.exception.UsuarioNoLogeadoException;
 import madstodolist.dto.EquipoData;
+import madstodolist.dto.UsuarioData;
 import madstodolist.model.Equipo;
+import madstodolist.model.Usuario;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -45,6 +47,17 @@ public class EquipoController {
         model.addAttribute("equipos", equipos);
 
         return "listaEquipos";
+    }
+
+    @GetMapping("/logeados/equipos/{equipo-id}/miembros")
+    public String listadoMiembrosEquipo(@PathVariable(value="equipo-id") Long idEquipo,
+                                        Model model) {
+
+        List<UsuarioData> usuarios = equipoService.usuariosEquipo(idEquipo);
+
+        model.addAttribute("usuarios", usuarios);
+
+        return "listaUsuariosDeUnEquipo";
     }
 
 

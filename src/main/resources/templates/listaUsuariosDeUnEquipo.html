@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments :: head (titulo='Lista de Equipos')"></head>
+<head th:replace="fragments :: head (titulo='Lista de Miembros del Equipo')"></head>
 
 <body>
 <div th:replace="fragments::menuBar"></div>
 <div class="container mt-4">
-    <h2>Lista de Equipos</h2>
+    <h2>Lista de Miembros del equipo</h2>
 
     <!-- Flash Messages -->
     <div th:if="${mensaje}" class="alert alert-success" role="alert">
@@ -18,16 +18,15 @@
         <tr>
             <th>ID</th>
             <th>Nombre</th>
-            <th>Ver Miembros del Equipo</th>
+            <th>Email</th>
+
         </tr>
         </thead>
         <tbody>
-        <tr th:each="equipo : ${equipos}">
-            <td th:text="${equipo.id}"></td>
-            <td th:text="${equipo.nombre}"></td>
-            <td>
-            <a th:href="@{'/logeados/equipos/' + ${equipo.id} + '/miembros'}">Ver Miembros del Equipo</a>
-            </td>
+        <tr th:each="usuario : ${usuarios}">
+            <td th:text="${usuario.id}"></td>
+            <td th:text="${usuario.nombre}"></td>
+            <td th:text="${usuario.email}"></td>
         </tr>
         </tbody>
     </table>

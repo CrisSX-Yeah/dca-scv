@@ -120,6 +120,7 @@ public class Usuario implements Serializable {
         this.blocked = blocked;
     }
 
+
     public Set<Recurso> getRecursos() {
         return recursos;
     }

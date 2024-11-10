@@ -1,6 +1,7 @@
 package madstodolist.controller;
 
 import madstodolist.controller.exception.*;
+import madstodolist.service.EquipoServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -51,5 +52,12 @@ public class GlobalExceptionHandler {
         return mav;
     }
 
-    // Optionally, handle other exceptions
+    @ExceptionHandler(EquipoServiceException.class)
+    public ModelAndView handleEquipoServiceException(EquipoServiceException ex) {
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("errorMessage", ex.getMessage());
+        mav.setViewName("error/404"); // Asegúrate de tener 404.html en src/main/resources/templates/error/
+        mav.setStatus(HttpStatus.NOT_FOUND);
+        return mav;
+    }
 }

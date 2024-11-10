@@ -40,6 +40,7 @@ public class EquipoService {
         return modelMapper.map(equipo, EquipoData.class);
     }
 
+
     @Transactional(readOnly = true)
     public EquipoData recuperarEquipo(Long id) {
         Equipo equipo = equipoRepository.findById(id).orElse(null);

@@ -30,6 +30,7 @@ public class EquipoService {
     @Autowired
     UsuarioRepository usuarioRepository;
 
+
     @Autowired
     private ModelMapper modelMapper;
 

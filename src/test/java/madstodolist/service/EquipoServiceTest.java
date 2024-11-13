@@ -16,6 +16,7 @@ import java.util.List;
 @Sql(scripts = "/clean-db.sql")
 public class EquipoServiceTest {
 
+
     @Autowired
     EquipoService equipoService;
 

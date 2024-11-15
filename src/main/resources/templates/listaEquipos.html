@@ -50,7 +50,7 @@
                     </button>
                 </form>
 
-                <a th:href="@{'/logeados/equipos/' + ${equipo.id} + '/editar'}" class="btn btn-primary btn-sm">Editar</a>
+                <a th:if="${usuario != null and usuario.admin}" th:href="@{'/admin/auth/equipos/' + ${equipo.id} + '/editar'}" class="btn btn-primary btn-sm">Editar</a>
             </td>
         </tr>
         </tbody>

@@ -187,4 +187,27 @@ public class EquipoServiceTest {
         assertThat(equipo.getNombre()).isEqualTo("Proyecto 1 Modificado");
     }
 
+    @Test
+    public void borrarEquipo() {
+        Map<String, Long> ids = addUsuariosEquiposBD();
+        Long equipoId = ids.get("equipoId");
+        Long usuarioId = ids.get("initialUserId");
+
+        // WHEN
+        equipoService.borrarEquipo(equipoId);
+
+        // THEN
+        // Verificamos que se lanza una excepción al intentar recuperar el equipo eliminado
+        assertThatThrownBy(() -> equipoService.recuperarEquipo(equipoId))
+                .isInstanceOf(EquipoServiceException.class);
+
+        // Verificamos que hay solo dos equipos restantes
+        List<EquipoData> equipos = equipoService.findAllOrdenadoPorNombre();
+        assertThat(equipos).hasSize(2);
+
+        List<EquipoData> equiposInitialUser = equipoService.equiposUsuario(usuarioId);
+        assertThat(equiposInitialUser).hasSize(2);
+    }
+
+
 }

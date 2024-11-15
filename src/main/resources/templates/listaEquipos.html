@@ -51,6 +51,15 @@
                 </form>
 
                 <a th:if="${usuario != null and usuario.admin}" th:href="@{'/admin/auth/equipos/' + ${equipo.id} + '/editar'}" class="btn btn-primary btn-sm">Editar</a>
+
+                <form th:if="${usuario != null and usuario.admin}" th:action="@{'/admin/auth/equipos/' + ${equipo.id} + '/borrar'}" method="post" style="display:inline;">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-danger btn-sm"
+                            onclick="return confirm('¿Estás seguro de que quieres borrar este equipo?');">
+                        Borrar
+                    </button>
+                </form>
+
             </td>
         </tr>
         </tbody>

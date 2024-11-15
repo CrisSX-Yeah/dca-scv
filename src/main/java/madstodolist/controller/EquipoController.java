@@ -2,6 +2,7 @@ package madstodolist.controller;
 
 import madstodolist.controller.exception.UsuarioNoLogeadoException;
 import madstodolist.dto.EquipoData;
+import madstodolist.dto.TareaData;
 import madstodolist.dto.UsuarioData;
 import madstodolist.model.Equipo;
 import madstodolist.model.Usuario;
@@ -107,6 +108,27 @@ public class EquipoController {
                                                 Model model, RedirectAttributes flash,
                                                 HttpSession session) {
         equipoService.borrarUsuarioDelEquipo(idEquipo, idUsuario);
+        return "redirect:/logeados/equipos";
+    }
+
+    @GetMapping("/logeados/equipos/{id}/editar")
+    public String formEditarEquipo(@ModelAttribute("equipoData") EquipoData equipoData,
+                                  Model model) {
+        EquipoData equipo = equipoService.recuperarEquipo(equipoData.getId());
+        model.addAttribute("equipo", equipo);
+        return "formEditarEquipo";
+    }
+
+    @PostMapping("/logeados/equipos/{id}/editar")
+    public String editarEquipo(@ModelAttribute EquipoData equipoData,
+                              Model model, RedirectAttributes flash,
+                              HttpSession session) {
+
+        equipoService.modificarNombreEquipo(equipoData.getId(), equipoData.getNombre());
+
+
+        flash.addFlashAttribute("mensaje", "Equipo Modificado correctamente");
+
         return "redirect:/logeados/equipos";
     }
 

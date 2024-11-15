@@ -1,6 +1,7 @@
 package madstodolist.service;
 
 import madstodolist.dto.RegistroData;
+import madstodolist.dto.TareaData;
 import madstodolist.dto.UsuarioData;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
@@ -10,7 +11,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SpringBootTest
 @Sql(scripts = "/clean-db.sql")
@@ -22,6 +26,45 @@ public class EquipoServiceTest {
 
     @Autowired
     UsuarioService usuarioService;
+
+    // Método para inicializar los datos de prueba en la BD
+    Map<String, Long> addUsuariosEquiposBD() {
+        // Añadimos dos usuarios a la base de datos
+
+        RegistroData initialRegister = new RegistroData();
+        initialRegister.setEmail("initialRegister@ua");
+        initialRegister.setPassword("123");
+        UsuarioData initialUserData = usuarioService.registrar(initialRegister);
+
+        RegistroData registroData = new RegistroData();
+        registroData.setEmail("user@ua");
+        registroData.setPassword("123");
+        UsuarioData usuarioNuevo = usuarioService.registrar(registroData);
+
+        // Y añadimos tres equipos asociados a ese usuario
+
+        EquipoData equipo1 = equipoService.crearEquipo("Proyecto 1");
+        EquipoData equipo2 = equipoService.crearEquipo("Proyecto 2");
+        EquipoData equipo3 = equipoService.crearEquipo("Proyecto 3");
+
+        //Y añadimos los dos usuarios a cada equipo
+
+        equipoService.añadirUsuarioAEquipo(equipo1.getId(),initialUserData.getId());
+
+        equipoService.añadirUsuarioAEquipo(equipo2.getId(), initialUserData.getId());
+
+        equipoService.añadirUsuarioAEquipo(equipo3.getId(), initialUserData.getId());
+
+
+        // Devolvemos los ids del usuario y de la primera tarea añadida
+        Map<String, Long> ids = new HashMap<>();
+        ids.put("initialUserId", initialUserData.getId());
+        ids.put("usuarioId", usuarioNuevo.getId());
+        ids.put("equipoId", equipo1.getId());
+        ids.put("equipoId2", equipo2.getId());
+        ids.put("equipoId3", equipo3.getId());
+        return ids;
+    }
 
     @Test
     public void crearRecuperarEquipo() {
@@ -61,47 +104,39 @@ public class EquipoServiceTest {
     public void añadirUsuarioAEquipo() {
         // GIVEN
         // A new user and a team in the database
-        RegistroData registroData = new RegistroData();
-        registroData.setEmail("user@ua");
-        registroData.setPassword("123");
-        UsuarioData usuario = usuarioService.registrar(registroData);  // Register the user with RegistroData
-
-        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+        Map<String, Long> ids = addUsuariosEquiposBD();
+        Long usuarioId = ids.get("usuarioId");
+        Long equipoId = ids.get("equipoId");
 
         // WHEN
         // Add the user to the team
-        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+        equipoService.añadirUsuarioAEquipo(equipoId, usuarioId);
 
         // THEN
         // Check that the user belongs to the team
-        List<UsuarioData> usuarios = equipoService.usuariosEquipo(equipo.getId());
-        assertThat(usuarios).hasSize(1);
-        assertThat(usuarios.get(0).getEmail()).isEqualTo("user@ua");
+        List<UsuarioData> usuarios = equipoService.usuariosEquipo(equipoId);
+        assertThat(usuarios).hasSize(2);
+        assertThat(usuarios.get(1).getEmail()).isEqualTo("user@ua");
     }
 
     @Test
     public void recuperarEquiposDeUsuario() {
         // GIVEN
         // Un usuario y dos equipos en la base de datos
-        RegistroData registroData = new RegistroData();
-        registroData.setEmail("user@ua");
-        registroData.setPassword("123");
-        UsuarioData usuario = usuarioService.registrar(registroData);
-
-        EquipoData equipo1 = equipoService.crearEquipo("Proyecto 1");
-        EquipoData equipo2 = equipoService.crearEquipo("Proyecto 2");
-        equipoService.añadirUsuarioAEquipo(equipo1.getId(), usuario.getId());
-        equipoService.añadirUsuarioAEquipo(equipo2.getId(), usuario.getId());
+        Map<String, Long> ids = addUsuariosEquiposBD();
+        Long initialUserId = ids.get("initialUserId");
+        Long equipoId = ids.get("equipoId");
 
         // WHEN
         // Recuperamos los equipos del usuario
-        List<EquipoData> equipos = equipoService.equiposUsuario(usuario.getId());
+        List<EquipoData> equipos = equipoService.equiposUsuario(initialUserId);
 
         // THEN
-        // El usuario pertenece a los dos equipos
-        assertThat(equipos).hasSize(2);
+        // El usuario pertenece a los tres equipos
+        assertThat(equipos).hasSize(3);
         assertThat(equipos.get(0).getNombre()).isEqualTo("Proyecto 1");
         assertThat(equipos.get(1).getNombre()).isEqualTo("Proyecto 2");
+        assertThat(equipos.get(2).getNombre()).isEqualTo("Proyecto 3");
     }
 
     @Test
@@ -127,21 +162,17 @@ public class EquipoServiceTest {
     public void borrarUsuarioDelEquipo() {
         // GIVEN
         // A new user and a team in the database
-        RegistroData registroData = new RegistroData();
-        registroData.setEmail("user@ua");
-        registroData.setPassword("123");
-        UsuarioData usuario = usuarioService.registrar(registroData);  // Register the user with RegistroData
-
-        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
-        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+        Map<String, Long> ids = addUsuariosEquiposBD();
+        Long initialUserId = ids.get("initialUserId");
+        Long equipoId = ids.get("equipoId");
 
         // WHEN
         // Delete the user from the team
-        equipoService.borrarUsuarioDelEquipo(equipo.getId(), usuario.getId());
+        equipoService.borrarUsuarioDelEquipo(equipoId, initialUserId);
 
         // THEN
         // Check that the user does not belong to the team
-        List<UsuarioData> usuarios = equipoService.usuariosEquipo(equipo.getId());
+        List<UsuarioData> usuarios = equipoService.usuariosEquipo(equipoId);
         assertThat(usuarios).hasSize(0);
     }
 

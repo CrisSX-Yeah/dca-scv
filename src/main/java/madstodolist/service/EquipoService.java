@@ -174,4 +174,13 @@ public class EquipoService {
         equipo = equipoRepository.save(equipo);
         return modelMapper.map(equipo, EquipoData.class);
     }
+
+    public void borrarEquipo(Long equipoId) {
+        logger.debug("Borrando el Equipo con id " + equipoId);
+        Equipo equipo = equipoRepository.findById(equipoId).orElse(null);
+        if (equipo == null) {
+            throw new EquipoServiceException("El equipo con id " + equipoId + "no existe");
+        }
+        equipoRepository.delete(equipo);
+    }
 }

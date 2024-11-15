@@ -94,4 +94,8 @@ public class Equipo implements Serializable {
         this.getUsuarios().remove(usuario);
         usuario.getEquipos().remove(this);
     }
+
+    public void setNombre(String s) {
+        this.nombre = s;
+    }
 }

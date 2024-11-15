@@ -176,4 +176,15 @@ public class EquipoServiceTest {
         assertThat(usuarios).hasSize(0);
     }
 
+    @Test
+    public void editarNombreDelEquipo() {
+        Map<String, Long> ids = addUsuariosEquiposBD();
+        Long equipoId = ids.get("equipoId");
+
+        equipoService.modificarNombreEquipo(equipoId, "Proyecto 1 Modificado");
+
+        EquipoData equipo = equipoService.recuperarEquipo(equipoId);
+        assertThat(equipo.getNombre()).isEqualTo("Proyecto 1 Modificado");
+    }
+
 }

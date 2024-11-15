@@ -164,4 +164,14 @@ public class EquipoService {
 
         return  pertenecientes;
     }
+
+    public EquipoData modificarNombreEquipo(Long equipoId, String newName) {
+        Equipo equipo = equipoRepository.findById(equipoId).orElse(null);
+        if (equipo == null) {
+            throw new EquipoServiceException("El equipo con id " + equipoId + "no existe");
+        }
+        equipo.setNombre(newName);
+        equipo = equipoRepository.save(equipo);
+        return modelMapper.map(equipo, EquipoData.class);
+    }
 }

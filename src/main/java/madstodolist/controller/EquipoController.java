@@ -111,7 +111,7 @@ public class EquipoController {
         return "redirect:/logeados/equipos";
     }
 
-    @GetMapping("/logeados/equipos/{id}/editar")
+    @GetMapping("/admin/auth/equipos/{id}/editar")
     public String formEditarEquipo(@ModelAttribute("equipoData") EquipoData equipoData,
                                   Model model) {
         EquipoData equipo = equipoService.recuperarEquipo(equipoData.getId());
@@ -119,7 +119,7 @@ public class EquipoController {
         return "formEditarEquipo";
     }
 
-    @PostMapping("/logeados/equipos/{id}/editar")
+    @PostMapping("/admin/auth/equipos/{id}/editar")
     public String editarEquipo(@ModelAttribute EquipoData equipoData,
                               Model model, RedirectAttributes flash,
                               HttpSession session) {

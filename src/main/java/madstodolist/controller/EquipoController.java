@@ -1,5 +1,6 @@
 package madstodolist.controller;
 
+import madstodolist.controller.exception.TareaNotFoundException;
 import madstodolist.controller.exception.UsuarioNoLogeadoException;
 import madstodolist.dto.EquipoData;
 import madstodolist.dto.TareaData;
@@ -120,16 +121,31 @@ public class EquipoController {
     }
 
     @PostMapping("/admin/auth/equipos/{id}/editar")
-    public String editarEquipo(@ModelAttribute EquipoData equipoData,
-                              Model model, RedirectAttributes flash,
-                              HttpSession session) {
+    public String editarEquipo(@PathVariable(value="id") Long idEquipo,
+                               @ModelAttribute EquipoData equipoData,
+                               Model model, RedirectAttributes flash,
+                               HttpSession session) {
 
-        equipoService.modificarNombreEquipo(equipoData.getId(), equipoData.getNombre());
+        equipoService.modificarNombreEquipo(idEquipo, equipoData.getNombre());
 
 
         flash.addFlashAttribute("mensaje", "Equipo Modificado correctamente");
 
         return "redirect:/logeados/equipos";
     }
+
+
+    @PostMapping("/admin/auth/equipos/{id}/borrar")
+    public String borrarEquipo(@PathVariable(value="id") Long idEquipo,
+                               @ModelAttribute EquipoData equipoData,
+                               Model model, RedirectAttributes flash,
+                               HttpSession session) {
+        EquipoData equipo = equipoService.recuperarEquipo(equipoData.getId());
+
+        equipoService.borrarEquipo(equipo.getId());
+        flash.addFlashAttribute("mensaje", "Equipo borrado correctamente");
+        return "redirect:/logeados/equipos";
+    }
+
 
 }

@@ -123,4 +123,26 @@ public class EquipoServiceTest {
                 .isInstanceOf(EquipoServiceException.class);
     }
 
+    @Test
+    public void borrarUsuarioDelEquipo() {
+        // GIVEN
+        // A new user and a team in the database
+        RegistroData registroData = new RegistroData();
+        registroData.setEmail("user@ua");
+        registroData.setPassword("123");
+        UsuarioData usuario = usuarioService.registrar(registroData);  // Register the user with RegistroData
+
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+
+        // WHEN
+        // Delete the user from the team
+        equipoService.borrarUsuarioDelEquipo(equipo.getId(), usuario.getId());
+
+        // THEN
+        // Check that the user does not belong to the team
+        List<UsuarioData> usuarios = equipoService.usuariosEquipo(equipo.getId());
+        assertThat(usuarios).hasSize(0);
+    }
+
 }

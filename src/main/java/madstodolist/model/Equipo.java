@@ -87,4 +87,11 @@ public class Equipo implements Serializable {
         // Generamos un hash basado en los campos obligatorios
         return Objects.hash(this.nombre);
     }
+
+    public  void  deleteUsuario (Usuario usuario) {
+        // Hay que actualiar ambas colecciones, porque
+        // JPA/Hibernate no lo hace automáticamente
+        this.getUsuarios().remove(usuario);
+        usuario.getEquipos().remove(this);
+    }
 }

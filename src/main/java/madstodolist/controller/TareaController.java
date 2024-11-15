@@ -2,7 +2,7 @@ package madstodolist.controller;
 
 import madstodolist.authentication.ManagerUserSession;
 import madstodolist.controller.exception.UsuarioNoLogeadoException;
-import madstodolist.controller.exception.TareaNotFoundException;
+import madstodolist.controller.exception.EquipoNotFoundException;
 import madstodolist.dto.TareaData;
 import madstodolist.dto.UsuarioData;
 import madstodolist.service.TareaService;
@@ -86,7 +86,7 @@ public class TareaController {
 
         TareaData tarea = tareaService.findById(idTarea);
         if (tarea == null) {
-            throw new TareaNotFoundException();
+            throw new EquipoNotFoundException();
         }
 
         comprobarUsuarioLogeado(tarea.getUsuarioId());
@@ -116,7 +116,7 @@ public class TareaController {
                                        Model model, RedirectAttributes flash, HttpSession session) {
         TareaData tarea = tareaService.findById(idTarea);
         if (tarea == null) {
-            throw new TareaNotFoundException();
+            throw new EquipoNotFoundException();
         }
 
         Long idUsuario = tarea.getUsuarioId();
@@ -133,7 +133,7 @@ public class TareaController {
     public String borrarTarea(@PathVariable(value="id") Long idTarea, RedirectAttributes flash, Model model, HttpSession session) {
         TareaData tarea = tareaService.findById(idTarea);
         if (tarea == null) {
-            throw new TareaNotFoundException();
+            throw new EquipoNotFoundException();
         }
 
         comprobarUsuarioLogeado(tarea.getUsuarioId());
@@ -161,7 +161,7 @@ public class TareaController {
                                  Model model, HttpSession session) {
         TareaData tarea = tareaService.findById(idTarea);
         if (tarea == null) {
-            throw new TareaNotFoundException();
+            throw new EquipoNotFoundException();
         }
 
         comprobarUsuarioLogeado(tarea.getUsuarioId());
@@ -178,7 +178,7 @@ public class TareaController {
                                        Model model, RedirectAttributes flash, HttpSession session) {
         TareaData tarea = tareaService.findById(idTarea);
         if (tarea == null) {
-            throw new TareaNotFoundException();
+            throw new EquipoNotFoundException();
         }
 
         Long idUsuario = tarea.getUsuarioId();
@@ -200,7 +200,7 @@ public class TareaController {
                                     Model model, RedirectAttributes flash, HttpSession session) {
         TareaData tarea = tareaService.findById(idTarea);
         if (tarea == null) {
-            throw new TareaNotFoundException();
+            throw new EquipoNotFoundException();
         }
 
         Long idUsuario = tarea.getUsuarioId();

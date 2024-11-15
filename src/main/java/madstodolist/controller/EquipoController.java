@@ -1,13 +1,9 @@
 package madstodolist.controller;
 
-import madstodolist.controller.exception.TareaNotFoundException;
+import madstodolist.controller.exception.EquipoNotFoundException;
 import madstodolist.controller.exception.UsuarioNoLogeadoException;
 import madstodolist.dto.EquipoData;
-import madstodolist.dto.TareaData;
 import madstodolist.dto.UsuarioData;
-import madstodolist.model.Equipo;
-import madstodolist.model.Usuario;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import madstodolist.authentication.ManagerUserSession;
@@ -22,7 +18,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 public class EquipoController {
@@ -64,6 +59,12 @@ public class EquipoController {
     public String listadoMiembrosEquipo(@PathVariable(value="equipo-id") Long idEquipo,
                                         Model model) {
 
+        EquipoData equipo = equipoService.recuperarEquipo(idEquipo);
+
+        if (equipo == null) {
+            throw new EquipoNotFoundException();
+        }
+
         List<UsuarioData> usuarios = equipoService.usuariosEquipo(idEquipo);
 
         model.addAttribute("usuarios", usuarios);
@@ -98,6 +99,12 @@ public class EquipoController {
                                                 @ModelAttribute EquipoData equipoData,
                                                 Model model, RedirectAttributes flash,
                                                 HttpSession session) {
+        EquipoData equipo = equipoService.recuperarEquipo(idEquipo);
+
+        if (equipo == null) {
+            throw new EquipoNotFoundException();
+        }
+
         equipoService.añadirUsuarioAEquipo(idEquipo, idUsuario);
         return "redirect:/logeados/equipos";
     }
@@ -108,14 +115,27 @@ public class EquipoController {
                                                 @ModelAttribute EquipoData equipoData,
                                                 Model model, RedirectAttributes flash,
                                                 HttpSession session) {
+        EquipoData equipo = equipoService.recuperarEquipo(idEquipo);
+
+        if (equipo == null) {
+            throw new EquipoNotFoundException();
+        }
+
+
         equipoService.borrarUsuarioDelEquipo(idEquipo, idUsuario);
         return "redirect:/logeados/equipos";
     }
 
     @GetMapping("/admin/auth/equipos/{id}/editar")
-    public String formEditarEquipo(@ModelAttribute("equipoData") EquipoData equipoData,
+    public String formEditarEquipo(@PathVariable(value="id") Long idEquipo,
+                                  @ModelAttribute("equipoData") EquipoData equipoData,
                                   Model model) {
-        EquipoData equipo = equipoService.recuperarEquipo(equipoData.getId());
+        EquipoData equipo = equipoService.recuperarEquipo(idEquipo);
+
+        if (equipo == null) {
+            throw new EquipoNotFoundException();
+        }
+
         model.addAttribute("equipo", equipo);
         return "formEditarEquipo";
     }
@@ -125,6 +145,12 @@ public class EquipoController {
                                @ModelAttribute EquipoData equipoData,
                                Model model, RedirectAttributes flash,
                                HttpSession session) {
+
+        EquipoData equipo = equipoService.recuperarEquipo(idEquipo);
+
+        if (equipo == null) {
+            throw new EquipoNotFoundException();
+        }
 
         equipoService.modificarNombreEquipo(idEquipo, equipoData.getNombre());
 
@@ -140,12 +166,15 @@ public class EquipoController {
                                @ModelAttribute EquipoData equipoData,
                                Model model, RedirectAttributes flash,
                                HttpSession session) {
-        EquipoData equipo = equipoService.recuperarEquipo(equipoData.getId());
+        EquipoData equipo = equipoService.recuperarEquipo(idEquipo);
+
+        if (equipo == null) {
+            throw new EquipoNotFoundException();
+        }
 
         equipoService.borrarEquipo(equipo.getId());
         flash.addFlashAttribute("mensaje", "Equipo borrado correctamente");
         return "redirect:/logeados/equipos";
     }
-
 
 }

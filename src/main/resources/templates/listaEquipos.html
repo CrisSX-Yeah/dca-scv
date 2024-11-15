@@ -33,7 +33,8 @@
 
                 <form th:action="@{'/logeados/equipos/' + ${equipo.id} + '/agrega-usuario-logeado/' + ${usuario.id} }"
                       method="post"
-                      th:if="${!equiposPertenecientes[iStat.index]}">
+                      th:if="${!equiposPertenecientes[iStat.index]}"
+                      class="d-inline me-2">
                     <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
                     <button type="submit" class="btn btn-sm btn-success">
                         <span th:text="'Agregarme al Equipo'"></span>
@@ -41,12 +42,15 @@
                 </form>
                 <form th:action="@{'/logeados/equipos/' + ${equipo.id} + '/elimina-usuario-logeado/' + ${usuario.id} }"
                       method="post"
-                      th:if="${equiposPertenecientes[iStat.index]}">
+                      th:if="${equiposPertenecientes[iStat.index]}"
+                      class="d-inline me-2">
                     <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
                     <button type="submit" class="btn btn-sm btn-danger">
                         <span th:text="'Eliminarme del Equipo'"></span>
                     </button>
                 </form>
+
+                <a th:href="@{'/logeados/equipos/' + ${equipo.id} + '/editar'}" class="btn btn-primary btn-sm">Editar</a>
             </td>
         </tr>
         </tbody>

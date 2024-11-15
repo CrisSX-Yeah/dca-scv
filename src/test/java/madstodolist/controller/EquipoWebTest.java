@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -87,6 +87,7 @@ public class EquipoWebTest {
                 .andExpect(view().name("listaEquipos"))
                 .andExpect(model().attributeExists("equipos"))
                 .andExpect(model().attribute("equipos", hasSize(2)))
+                .andExpect(model().attributeExists("equiposPertenecientes"))
                 .andExpect(content().string(allOf(
                         containsString("Equipo Alpha"),
                         containsString("Equipo Beta")
@@ -149,4 +150,98 @@ public class EquipoWebTest {
                 .andExpect(model().attributeExists("errorMessage")) // Verifica que el modelo tiene 'errorMessage'
                 .andExpect(content().string(containsString("El equipo con id 999no existe"))); // Verifica el mensaje de error
     }
+
+    @Test
+    public void getNuevoEquipoDevuelveForm() throws Exception {
+        // GIVEN
+        Long usuarioId = addUsuarioEquiposBD().get("usuarioId");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioId);
+
+        String urlPeticion = "/logeados/equipos/nuevo-equipo";
+        String urlAction = "action=\"/logeados/equipos/nuevo-equipo\"";
+
+        this.mockMvc.perform(get(urlPeticion).with(user("usuario@ua.com")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("formNuevoEquipo"))
+                .andExpect(content().string(allOf(
+                        containsString("Nuevo Equipo"),
+                        containsString("Nombre del equipo"),
+                        containsString("Crear Equipo"),
+                        containsString("Cancelar")
+                )));
+    }
+
+    @Test
+    public void postNuevoEquipoDevuelveRedirectYAgregaEquipo() throws Exception {
+        Long usuarioId = addUsuarioEquiposBD().get("usuarioId");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioId);
+
+        String urlPeticion = "/logeados/equipos/nuevo-equipo";
+        String urlRedirect = "/logeados/equipos";
+
+        this.mockMvc.perform(post(urlPeticion)
+                        .with(csrf())
+                        .with(user("usuario@ua.com"))
+                        .param("nombre", "Nuevo Equipo"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(urlRedirect));
+
+        this.mockMvc.perform(get(urlRedirect).with(user("usuario@ua.com")))
+                .andExpect(content().string(containsString("Nuevo Equipo")));
+    }
+
+    @Test
+    public void agregarYLuegoEliminaUsuarioLogeadoDeEquipo() throws Exception {
+        // Configurar datos iniciales
+        Map<String, Long> ids = addUsuarioEquiposBD();
+        Long usuarioId = ids.get("usuarioId");
+        Long equipo1Id = ids.get("equipo1Id");
+        Long equipo2Id = ids.get("equipo2Id");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioId);
+
+
+        String urlRedirect = "/logeados/equipos";
+        // Simular agregar usuario al equipo
+        String urlAgregar = "/logeados/equipos/" + equipo1Id + "/agrega-usuario-logeado/" + usuarioId;
+        String urlAgregar2 = "/logeados/equipos/" + equipo2Id + "/agrega-usuario-logeado/" + usuarioId;
+
+        this.mockMvc.perform(post(urlAgregar)
+                        .with(csrf())
+                        .with(user("usuario@ua.com")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(urlRedirect));
+
+        this.mockMvc.perform(post(urlAgregar2)
+                        .with(csrf())
+                        .with(user("usuario@ua.com")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(urlRedirect));
+
+        // Verificar que el botón "Eliminarme del Equipo" está presente
+        this.mockMvc.perform(get(urlRedirect).with(user("usuario@ua.com")))
+                .andExpect(content().string(containsString("Eliminarme del Equipo")))
+                .andExpect(content().string(not(containsString("Agregarme al Equipo"))));
+
+        // Simular eliminar usuario del equipo
+        String urlEliminar = "/logeados/equipos/" + equipo1Id + "/elimina-usuario-logeado/" + usuarioId;
+        String urlEliminar2 = "/logeados/equipos/" + equipo2Id + "/elimina-usuario-logeado/" + usuarioId;
+
+        this.mockMvc.perform(post(urlEliminar)
+                        .with(csrf())
+                        .with(user("usuario@ua.com")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(urlRedirect));
+
+        this.mockMvc.perform(post(urlEliminar2)
+                        .with(csrf())
+                        .with(user("usuario@ua.com")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(urlRedirect));
+
+        // IMPORTANTE: Realizar otra solicitud GET para actualizar el estado de la página
+        this.mockMvc.perform(get(urlRedirect).with(user("usuario@ua.com")))
+                .andExpect(content().string(containsString("Agregarme al Equipo")))
+                .andExpect(content().string(not(containsString("Eliminarme del Equipo"))));
+    }
+
 }

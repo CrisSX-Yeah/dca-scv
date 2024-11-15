@@ -21,8 +21,8 @@ public class GlobalExceptionHandler {
         return mav;
     }
 
-    @ExceptionHandler(TareaNotFoundException.class)
-    public ModelAndView handleTareaNotFoundException(TareaNotFoundException ex) {
+    @ExceptionHandler(EquipoNotFoundException.class)
+    public ModelAndView handleTareaNotFoundException(EquipoNotFoundException ex) {
         ModelAndView mav = new ModelAndView();
         mav.addObject("errorMessage", ex.getMessage());
         mav.setViewName("error/404"); // Ensure you have a 404.html in src/main/resources/templates/error/

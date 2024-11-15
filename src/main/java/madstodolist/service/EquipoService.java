@@ -30,6 +30,7 @@ public class EquipoService {
     @Autowired
     UsuarioRepository usuarioRepository;
 
+
     @Autowired
     private ModelMapper modelMapper;
 
@@ -39,6 +40,7 @@ public class EquipoService {
         equipoRepository.save(equipo);
         return modelMapper.map(equipo, EquipoData.class);
     }
+
 
     @Transactional(readOnly = true)
     public EquipoData recuperarEquipo(Long id) {
@@ -108,5 +110,22 @@ public class EquipoService {
         return  usuario.getEquipos().stream()
                 .map(equipo -> modelMapper.map(equipo,EquipoData.class))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void borrarUsuarioDelEquipo(Long id, Long id1) {
+        Equipo equipo = equipoRepository.findById(id).orElse(null);
+
+        if (equipo == null) {
+            throw new EquipoServiceException("El equipo con id " + id + "no existe");
+        }
+
+        Usuario usuario = usuarioRepository.findById(id1).orElse(null);
+
+        if (usuario == null) {
+            throw new EquipoServiceException("El usuario con id " + id + "no existe");
+        }
+
+        equipo.deleteUsuario(usuario);
     }
 }

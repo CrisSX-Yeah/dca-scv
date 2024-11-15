@@ -128,4 +128,40 @@ public class EquipoService {
 
         equipo.deleteUsuario(usuario);
     }
+
+    @Transactional(readOnly = true)
+    public Boolean usuarioPerteneceAEquipo(Long idEquipo, Long idUsuario) {
+        Equipo equipo = equipoRepository.findById(idEquipo).orElse(null);
+
+        if (equipo == null) {
+            throw new EquipoServiceException("El equipo con id " + idEquipo + "no existe");
+        }
+
+        Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+
+        if (usuario == null) {
+            throw new EquipoServiceException("El usuario con id " + idUsuario + "no existe");
+        }
+
+        return  equipo.getUsuarios().contains(usuario);
+
+    }
+
+    @Transactional(readOnly = true)
+    public List<Boolean> listaEquiposPerteneceUsuario(Long idUsuario) {
+
+        List<EquipoData> equipos = findAllOrdenadoPorNombre();
+
+        Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+
+        if (usuario == null) {
+            throw new EquipoServiceException("El usuario con id " + idUsuario + "no existe");
+        }
+
+        List <Boolean> pertenecientes = equipos.stream()
+                .map(equipo -> usuarioPerteneceAEquipo(equipo.getId(), idUsuario))
+                .collect(Collectors.toList());
+
+        return  pertenecientes;
+    }
 }

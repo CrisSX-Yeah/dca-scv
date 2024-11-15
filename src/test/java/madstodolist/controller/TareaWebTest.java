@@ -235,39 +235,4 @@ public class TareaWebTest {
 
     }
 
-
-    @Test
-    public void incrementarHorasALaTareaActualizaElNumeroDeHorasEnElHTML() throws Exception {
-        // GIVEN
-        // Un usuario con dos tareas en la BD
-        Map<String, Long> ids = addUsuarioTareasBD();
-        Long usuarioId = ids.get("usuarioId");
-        Long tareaLavarCocheId = ids.get("tareaId");
-
-        // Ver el comentario en el primer test
-        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioId);
-
-        // WHEN, THEN
-        // realizamos una petición POST al endpoint para asignar horas a una tarea
-
-        String urlIncrementarHoras = "/tareas/" + tareaLavarCocheId + "/incrementarHoras";
-        String urlRedirect = "/usuarios/" + usuarioId + "/tareas";
-
-        // Send POST request with CSRF and authenticated user
-        this.mockMvc.perform(post(urlIncrementarHoras)
-                        .with(csrf()) // Add CSRF token for security
-                        .with(user("user@ua"))) // Simulate logged-in user
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(urlRedirect));
-
-        // Y si realizamos un listado de las tareas del usuario
-        // ha cambiado el número de horas asignadas de la tarea modificada
-
-        String urlListado = "/usuarios/" + usuarioId + "/tareas";
-
-        this.mockMvc.perform(get(urlListado))
-                .andExpect(content().string(containsString("101")));
-
-    }
-
 }

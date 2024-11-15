@@ -19,18 +19,40 @@
             <th>ID</th>
             <th>Nombre</th>
             <th>Ver Miembros del Equipo</th>
+            <th>Acción</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="equipo : ${equipos}">
+        <tr th:each="equipo, iStat : ${equipos}">
             <td th:text="${equipo.id}"></td>
             <td th:text="${equipo.nombre}"></td>
             <td>
-            <a th:href="@{'/logeados/equipos/' + ${equipo.id} + '/miembros'}">Ver Miembros del Equipo</a>
+                <a th:href="@{'/logeados/equipos/' + ${equipo.id} + '/miembros'}">Ver Miembros del Equipo</a>
+            </td>
+            <td>
+
+                <form th:action="@{'/logeados/equipos/' + ${equipo.id} + '/agrega-usuario-logeado/' + ${usuario.id} }"
+                      method="post"
+                      th:if="${!equiposPertenecientes[iStat.index]}">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-sm btn-success">
+                        <span th:text="'Agregarme al Equipo'"></span>
+                    </button>
+                </form>
+                <form th:action="@{'/logeados/equipos/' + ${equipo.id} + '/elimina-usuario-logeado/' + ${usuario.id} }"
+                      method="post"
+                      th:if="${equiposPertenecientes[iStat.index]}">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        <span th:text="'Eliminarme del Equipo'"></span>
+                    </button>
+                </form>
             </td>
         </tr>
         </tbody>
     </table>
+
+    <a th:href="@{'/logeados/equipos/nuevo-equipo'}" class="btn btn-success">Nuevo Equipo</a>
 
 </div>
 

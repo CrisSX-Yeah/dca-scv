@@ -208,8 +208,8 @@ public class TareaController {
 
         comprobarUsuarioLogeado(idUsuario);
 
-        tareaService.incrementarHoras(tareaData.getId());
-        tareaService.calcularPromedioHoras(idUsuario);
+        tarea.setHours(0);
+        usuario.setPromedioTareas(0);
 
         flash.addFlashAttribute("mensaje", "Se han incrementado las horas de la tarea con éxito");
         model.addAttribute("usuario", usuario);

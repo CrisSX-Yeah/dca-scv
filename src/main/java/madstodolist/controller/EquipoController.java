@@ -177,4 +177,6 @@ public class EquipoController {
         return "redirect:/logeados/equipos";
     }
 
+
+
 }

@@ -25,6 +25,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(adminInterceptor)
                 .addPathPatterns("/registrados/**");
 
+        registry.addInterceptor(adminInterceptor)
+                .addPathPatterns("/admin/auth/**");
+
         // Apply LogeadoInterceptor to /logeados and /logeados/**
         registry.addInterceptor(logeadoInterceptor)
                 .addPathPatterns("/logeados/**");

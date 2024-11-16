@@ -54,6 +54,12 @@ public class EquipoWebTest {
         registroData.setPassword("password");
         UsuarioData usuario = usuarioService.registrar(registroData);
 
+        RegistroData registroDataAdmin = new RegistroData();
+        registroDataAdmin.setEmail("admin@admin.com");
+        registroDataAdmin.setPassword("admin");
+        registroDataAdmin.setAdmin(true);
+        UsuarioData usuarioAdmin = usuarioService.registrar(registroDataAdmin);
+
         // Añadimos dos equipos asociados a ese usuario
         EquipoData equipo1 = equipoService.crearEquipo("Equipo Alpha");
         EquipoData equipo2 = equipoService.crearEquipo("Equipo Beta");
@@ -62,11 +68,15 @@ public class EquipoWebTest {
         equipoService.añadirUsuarioAEquipo(equipo1.getId(), usuario.getId());
         equipoService.añadirUsuarioAEquipo(equipo2.getId(), usuario.getId());
 
+        Long equipoNoExistenteId = 999L;
+
         // Devolvemos los IDs del usuario y los equipos
         Map<String, Long> ids = new HashMap<>();
         ids.put("usuarioId", usuario.getId());
+        ids.put("usuarioAdmin", usuarioAdmin.getId());
         ids.put("equipo1Id", equipo1.getId());
         ids.put("equipo2Id", equipo2.getId());
+        ids.put("equipoNoExistenteId", equipoNoExistenteId);
 
         return ids;
     }
@@ -242,6 +252,203 @@ public class EquipoWebTest {
         this.mockMvc.perform(get(urlRedirect).with(user("usuario@ua.com")))
                 .andExpect(content().string(containsString("Agregarme al Equipo")))
                 .andExpect(content().string(not(containsString("Eliminarme del Equipo"))));
+    }
+
+    @Test
+    public void formEditarEquipo() throws Exception {
+        // GIVEN
+        Map<String, Long> ids = addUsuarioEquiposBD();
+        Long usuarioAdminId = ids.get("usuarioAdmin");
+        Long equipoId = ids.get("equipo1Id");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioAdminId);
+
+        String url = "/admin/auth/equipos/" + equipoId + "/editar";
+
+        this.mockMvc.perform(get(url)
+                        .with(user("admin@admin.com")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("formEditarEquipo"))
+                .andExpect(model().attributeExists("equipo"))
+                .andExpect(model().attribute("equipo", hasProperty("id", is(equipoId))))
+                .andExpect(model().attribute("equipo", hasProperty("nombre", is("Equipo Alpha"))));
+    }
+
+    @Test
+    public void editarEquipo() throws Exception {
+        // GIVEN
+        Map<String, Long> ids = addUsuarioEquiposBD();
+        Long usuarioAdminId = ids.get("usuarioAdmin");
+        Long equipoId = ids.get("equipo1Id");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioAdminId);
+
+        String urlPeticion = "/admin/auth/equipos/" + equipoId + "/editar";
+        String urlRedirect = "/logeados/equipos";
+
+        // WHEN
+        this.mockMvc.perform(post(urlPeticion)
+                        .with(csrf())
+                        .with(user("admin@admin.com"))
+                        .param("nombre", "Equipo Alpha Modificado"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(urlRedirect));
+
+        // THEN
+        this.mockMvc.perform(get(urlRedirect).with(user("admin@admin.com")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("listaEquipos"))
+                .andExpect(content().string(containsString("Equipo Alpha Modificado")));
+    }
+
+    @Test
+    public void borrarEquipo() throws Exception {
+        // GIVEN
+        Map<String, Long> ids = addUsuarioEquiposBD();
+        Long usuarioAdminId = ids.get("usuarioAdmin");
+        Long equipoId = ids.get("equipo1Id");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioAdminId);
+
+        String urlPeticion = "/admin/auth/equipos/" + equipoId + "/borrar";
+        String urlRedirect = "/logeados/equipos";
+
+        // WHEN
+        this.mockMvc.perform(post(urlPeticion)
+                        .with(csrf())
+                        .with(user("admin@admin.com")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(urlRedirect))
+                .andExpect(flash().attribute("mensaje", "Equipo borrado correctamente"));
+
+        // THEN
+        this.mockMvc.perform(get(urlRedirect).with(user("admin@admin.com").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("listaEquipos"))
+                .andExpect(content().string(not(containsString("Equipo Alpha"))));
+    }
+
+    @Test
+    public void listadoMiembrosEquipoNoExistente() throws Exception {
+        // GIVEN
+        Map<String, Long> ids = addUsuarioEquiposBD();
+        Long usuarioAdminId = ids.get("usuarioAdmin");
+        Long equipoNoExistenteId = ids.get("equipoNoExistenteId");
+
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioAdminId);
+
+         // ID que no existe
+        String url = "/logeados/equipos/" + equipoNoExistenteId + "/miembros";
+
+        // WHEN & THEN
+        this.mockMvc.perform(get(url)
+                        .with(user("admin@admin.com").roles("ADMIN")))
+                .andExpect(status().isNotFound()) // Espera un estado 404
+                .andExpect(view().name("error/404")) // Espera la vista de error 404
+                .andExpect(model().attributeExists("errorMessage")) // Verifica que el modelo tiene 'errorMessage'
+                .andExpect(content().string(containsString("El equipo con id " + equipoNoExistenteId + "no existe"))); // Verifica el mensaje de error
+    }
+
+    @Test
+    public void agregarUsuarioLogeadoEnEquipoNoExistente() throws Exception {
+        // GIVEN
+        Map<String, Long> ids = addUsuarioEquiposBD();
+        Long usuarioAdminId = ids.get("usuarioAdmin");
+        Long usuarioId = ids.get("usuarioId");
+        Long equipoNoExistenteId = ids.get("equipoNoExistenteId");
+
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioAdminId);
+
+
+        String urlPeticion = "/logeados/equipos/" + equipoNoExistenteId + "/agrega-usuario-logeado/" + usuarioId;
+
+        // WHEN & THEN
+        this.mockMvc.perform(post(urlPeticion)
+                        .with(csrf())
+                        .with(user("admin@admin.com")))
+                .andExpect(status().isNotFound()) // Espera un estado 404
+                .andExpect(view().name("error/404")) // Espera la vista de error 404
+                .andExpect(model().attributeExists("errorMessage")) // Verifica que el modelo tiene 'errorMessage'
+                .andExpect(content().string(containsString("El equipo con id " + equipoNoExistenteId + "no existe"))); // Verifica el mensaje de error
+    }
+
+    @Test
+    public void eliminaUsuarioLogeadoDeEquipoNoExistente() throws Exception {
+        // GIVEN
+        Map<String, Long> ids = addUsuarioEquiposBD();
+        Long usuarioAdminId = ids.get("usuarioAdmin");
+        Long usuarioId = ids.get("usuarioId");
+        Long equipoNoExistenteId = ids.get("equipoNoExistenteId");
+
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioAdminId);
+
+        String urlPeticion = "/logeados/equipos/" + equipoNoExistenteId + "/elimina-usuario-logeado/" + usuarioId;
+
+        // WHEN & THEN
+        this.mockMvc.perform(post(urlPeticion)
+                        .with(csrf())
+                        .with(user("admin@admin.com")))
+                .andExpect(status().isNotFound()) // Espera un estado 404
+                .andExpect(view().name("error/404")) // Espera la vista de error 404
+                .andExpect(model().attributeExists("errorMessage")) // Verifica que el modelo tiene 'errorMessage'
+                .andExpect(content().string(containsString("El equipo con id " + equipoNoExistenteId + "no existe"))); // Verifica el mensaje de error
+    }
+
+    @Test
+    public void formEditarEquipoNoExistente() throws Exception {
+        // GIVEN
+        Map<String, Long> ids = addUsuarioEquiposBD();
+        Long usuarioAdminId = ids.get("usuarioAdmin");
+        Long equipoNoExistenteId = ids.get("equipoNoExistenteId");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioAdminId);
+
+        String url = "/admin/auth/equipos/" + equipoNoExistenteId + "/editar";
+
+        // WHEN & THEN
+        this.mockMvc.perform(get(url)
+                        .with(user("admin@admin.com")))
+                .andExpect(status().isNotFound()) // Espera un estado 404
+                .andExpect(view().name("error/404")) // Espera la vista de error 404
+                .andExpect(model().attributeExists("errorMessage")) // Verifica que el modelo tiene 'errorMessage'
+                .andExpect(content().string(containsString("El equipo con id " + equipoNoExistenteId + "no existe"))); // Verifica el mensaje de error
+    }
+
+    @Test
+    public void editarEquipoNoExistente() throws Exception {
+        // GIVEN
+        Map<String, Long> ids = addUsuarioEquiposBD();
+        Long usuarioAdminId = ids.get("usuarioAdmin");
+        Long equipoNoExistenteId = ids.get("equipoNoExistenteId");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioAdminId);
+
+        String urlPeticion = "/admin/auth/equipos/" + equipoNoExistenteId + "/editar";
+
+        // WHEN & THEN
+        this.mockMvc.perform(post(urlPeticion)
+                        .with(csrf())
+                        .with(user("admin@admin.com"))
+                        .param("nombre", "Nombre Modificado"))
+                .andExpect(status().isNotFound()) // Espera un estado 404
+                .andExpect(view().name("error/404")) // Espera la vista de error 404
+                .andExpect(model().attributeExists("errorMessage")) // Verifica que el modelo tiene 'errorMessage'
+                .andExpect(content().string(containsString("El equipo con id " + equipoNoExistenteId + "no existe"))); // Verifica el mensaje de error
+    }
+
+    @Test
+    public void borrarEquipoNoExistente() throws Exception {
+        // GIVEN
+        Map<String, Long> ids = addUsuarioEquiposBD();
+        Long usuarioAdminId = ids.get("usuarioAdmin");
+        Long equipoNoExistenteId = ids.get("equipoNoExistenteId");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuarioAdminId);
+
+        String urlPeticion = "/admin/auth/equipos/" + equipoNoExistenteId + "/borrar";
+
+        // WHEN & THEN
+        this.mockMvc.perform(post(urlPeticion)
+                        .with(csrf())
+                        .with(user("admin@admin.com").roles("ADMIN")))
+                .andExpect(status().isNotFound()) // Espera un estado 404
+                .andExpect(view().name("error/404")) // Espera la vista de error 404
+                .andExpect(model().attributeExists("errorMessage")) // Verifica que el modelo tiene 'errorMessage'
+                .andExpect(content().string(containsString("El equipo con id " + equipoNoExistenteId + "no existe"))); // Verifica el mensaje de error
     }
 
 }

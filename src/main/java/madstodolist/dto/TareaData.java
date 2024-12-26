@@ -49,7 +49,7 @@ public class TareaData implements Serializable {
     // Sobreescribimos equals y hashCode para que dos tareas sean iguales
     // si tienen el mismo ID (ignoramos el resto de atributos)
 
-    // hola
+    // pre-commit
 
     @Override
     public boolean equals(Object o) {
